@@ -100,7 +100,7 @@ abstract class Application extends Singleton
 				return dirname(dirname(dirname(dirname(dirname(__FILE__)))));
 				break;
 			case 'assets':
-				return trailingslashit(plugin_dir_url($this->root_dir.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'index.css'));
+				return untrailingslashit(plugin_dir_url($this->root_dir.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'index.css'));
 				break;
 			default:
 				return null;

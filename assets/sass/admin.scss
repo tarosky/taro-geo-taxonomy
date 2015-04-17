@@ -1,0 +1,28 @@
+.wrap{
+
+  &--tarogeo{
+
+
+
+    .geo-importer{
+      pre{
+        display: none;
+        color: #fff;
+        font-family: monospace;
+        background-color: #444;
+        border: 3px solid #ddd;
+        padding: 2em;
+        line-height: 1.1;
+      }
+      .loading, .loaded{
+        pre{
+          display: block;
+        }
+      }
+      .loading{
+        opacity: .6;
+      }
+    }
+  }
+
+}

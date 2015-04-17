@@ -64,6 +64,7 @@ defined('ABSPATH') or die();
 				<?php echo $this->option['source']['description']; ?>
 			</p>
 			<?php submit_button($this->i18n->s('インポート')) ?>
+			<pre></pre>
 		</form>
 	</div>
 

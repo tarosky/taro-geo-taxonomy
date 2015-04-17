@@ -1,0 +1,26 @@
+{
+  "name": "tarosky/taro-geo-taxonomy",
+  "description": "WordPress plugin to create geometric taxonomy.",
+  "require": {
+    "php": ">=5.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "4.4.*",
+    "phpdocumentor/phpdocumentor": "2.*",
+    "wp-coding-standards/wpcs": "dev-master"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Tarosky INC.",
+      "email": "info@tarosky.co.jp"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "Taro\\GeoTaxonomy": "src/",
+      "Taro\\Common": "src/"
+    }
+  },
+  "minimum-stability": "stable"
+}

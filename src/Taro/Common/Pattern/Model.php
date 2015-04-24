@@ -35,6 +35,13 @@ class Model extends Application
 	protected $name = '';
 
 	/**
+	 * Override this for placeholder
+	 *
+	 * @var array
+	 */
+	protected $where_clause = array();
+
+	/**
 	 * Create SQL
 	 *
 	 * Override this if you need any extra table
@@ -70,6 +77,9 @@ class Model extends Application
 	protected function require_update(){
 		if( !$this->version ){
 			return false;
+		}
+		if( !$this->table_exists() ){
+			return true;
 		}
 		$current_version = get_option($this->option_key, '0.0');
 		return version_compare($this->version, $current_version, '>') || !$this->table_exists();
@@ -107,6 +117,60 @@ class Model extends Application
 	}
 
 	/**
+	 * Detect if utf8mb4 is supported
+	 *
+	 * @return bool
+	 */
+	protected function has_utf8mb4(){
+		return (bool)$this->get_row("SHOW CHARACTER SET LIKE 'utf8mb4'");
+	}
+
+	/**
+	 * Insert data
+	 *
+	 * @param array $data
+	 *
+	 * @return int
+	 */
+	public function insert($data){
+		$where_array = $this->get_where_array($data);
+		return (int) $this->db->insert($this->table, $data, $where_array);
+	}
+
+	/**
+	 * Update data
+	 *
+	 * @param array $data
+	 * @param array $where
+	 *
+	 * @return int
+	 */
+	public function update(array $data, array $where){
+		$dara_pl = $this->get_where_array($data);
+		$where_pl = $this->get_where_array($where);
+		return (int) $this->db->update($this->table, $data, $where, $dara_pl, $where_pl);
+	}
+
+	/**
+	 * Get where clause
+	 *
+	 * @param array $data
+	 *
+	 * @return array
+	 */
+	protected function get_where_array( array $data = array() ){
+		$place_holders = array();
+		foreach( $data as $column => $value ){
+			if( isset($this->where_clause[$column]) ){
+				$place_holders[] = $this->where_clause[$column];
+			}else{
+				$place_holders[] = '%s';
+			}
+		}
+		return $place_holders;
+	}
+
+	/**
 	 * Magic method overrode
 	 *
 	 * @param string $name
@@ -128,6 +192,7 @@ class Model extends Application
 				break;
 			default:
 				// Do nothing
+				return null;
 				break;
 		}
 	}

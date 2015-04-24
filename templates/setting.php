@@ -60,6 +60,8 @@ defined('ABSPATH') or die();
 		<form id="taro-geo-import-form" action="<?php echo admin_url('admin-ajax.php') ?>" method="post">
 			<input type="hidden" name="action" value="taro-geo-import" />
 			<?php wp_nonce_field('taro-geo-import', '_wpnonce', false) ?>
+			<input type="hidden" name="step" value="1" />
+			<input type="hidden" name="rows" value="0" />
 			<p class="description">
 				<?php echo $this->option['source']['description']; ?>
 			</p>

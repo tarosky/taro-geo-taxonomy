@@ -1,3 +1,12 @@
+@-webkit-keyframes taro-geo-rotate {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
 .wrap{
 
   &--tarogeo{
@@ -17,10 +26,27 @@
       .loading, .loaded{
         pre{
           display: block;
+          position: relative;
         }
       }
       .loading{
         opacity: .6;
+        pre:before{
+          color: #000;
+          font-family: dashicons;
+          content: "\f463";
+          display: block;
+          position: absolute;
+          width: 40px;
+          height: 40px;
+          font-size: 40px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          margin-left: -20px;
+          margin-top: -20px;
+          -webkit-animation: taro-geo-rotate 1s linear 0 infinite;
+        }
       }
     }
   }

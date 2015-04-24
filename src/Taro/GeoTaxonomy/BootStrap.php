@@ -31,7 +31,6 @@ class BootStrap extends Application
 			// Create tables
 			Zip::register();
 		}
-
 		add_action('init', array($this, 'init'));
 	}
 

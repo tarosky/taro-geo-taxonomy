@@ -5,6 +5,7 @@ namespace Taro\GeoTaxonomy\Admin;
 
 use phpDocumentor\Transformer\Exception;
 use Taro\Common\Pattern\Application;
+use Taro\GeoTaxonomy\Models\Zip;
 
 
 /**
@@ -91,54 +92,101 @@ class Setting extends Application
 			if( !current_user_can('manage_options') || !$this->input->verify_nonce('taro-geo-import') ){
 				throw new \Exception($this->i18n->_('あなたには権限がありません。'), 403);
 			}
-			// Check temp dir
-			$temp_dir = sys_get_temp_dir();
-			if( !is_writable($temp_dir) ){
-				throw new \Exception($this->i18n->s('一時ディレクトリに書き込みができませんでした。'), 500);
-			}
-			// Get zip
-			$response = wp_remote_get($this->option['source']['url']);
-			if( is_wp_error($response) ){
-				throw new \Exception($response->get_error_message(), $response->get_error_code());
-			}
-			// Save data
-			$zip_name = tempnam($temp_dir, 'taro-geo');
-			file_put_contents($zip_name, $response['body']);
-			if( !file_exists($zip_name) ){
-				throw new \Exception($this->i18n->s('一時ファイルの保存に失敗しました。'), 500);
-			}
-			// Extract zip
-			$csv = $zip_name.'.csv';
-			$zip = zip_open($zip_name);
-			if ($zip) {
-				while ($zip_entry = zip_read($zip)) {
-					$fp = fopen($csv, "w");
-					if (zip_entry_open($zip, $zip_entry, "r")) {
-						$buf = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
-						fwrite($fp,"$buf");
-						zip_entry_close($zip_entry);
-						fclose($fp);
+			switch( $this->input->post('step') ){
+				case 1:
+					// Check temp dir
+					$temp_dir = sys_get_temp_dir();
+					if( !is_writable($temp_dir) ){
+						throw new \Exception($this->i18n->s('一時ディレクトリに書き込みができませんでした。'), 500);
 					}
-				}
-				zip_close($zip);
-			}else{
-				throw new \Exception($this->i18n->s('Zipファイルの展開に失敗しました。'), 500);
+					// Get zip
+					$response = wp_remote_get($this->option['source']['url']);
+					if( is_wp_error($response) ){
+						throw new \Exception($response->get_error_message(), $response->get_error_code());
+					}
+					// Save data
+					$zip_name = tempnam($temp_dir, 'taro-geo');
+					file_put_contents($zip_name, $response['body']);
+					if( !file_exists($zip_name) ){
+						throw new \Exception($this->i18n->s('一時ファイルの保存に失敗しました。'), 500);
+					}
+					// Extract zip
+					$csv = $zip_name.'.csv';
+					$zip = zip_open($zip_name);
+					if ($zip) {
+						while ($zip_entry = zip_read($zip)) {
+							$fp = fopen($csv, "w");
+							if (zip_entry_open($zip, $zip_entry, "r")) {
+								$buf = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
+								fwrite($fp,"$buf");
+								zip_entry_close($zip_entry);
+								fclose($fp);
+							}
+						}
+						zip_close($zip);
+					}else{
+						throw new \Exception($this->i18n->s('Zipファイルの展開に失敗しました。'), 500);
+					}
+
+					if( !file_exists($csv) ){
+						throw new \Exception($this->i18n->s('Zipファイルの展開に失敗しました。'), 500);
+					}
+					update_option('taro-geo-csv', $csv);
+					$response = array(
+						'next' => 2,
+						'error' => false,
+						'rows' => 0,
+						'message' => $this->i18n->s('CSVファイルを取得しました……'),
+					);
+					break;
+				case 2:
+					// Current row
+					$rows = $this->input->post('rows');
+					$csv = get_option('taro-geo-csv');
+					if( !file_exists($csv) || !($handle = new \SplFileObject($csv)) ){
+						throw new \Exception($this->i18n->_('ファイルが存在しません。'), 403);
+					}
+					// Parse CSV
+					$model = Zip::get_instance();
+					$handle->seek($rows);
+					// Iteration
+					set_time_limit(0);
+					$done = 0;
+					while( !$handle->eof() ) {
+						$row = $handle->fgetcsv();
+						if ( count( $row ) > 7 ) {
+							$row = array_map( function ( $cell ) {
+								return mb_convert_kana( mb_convert_encoding( $cell, 'utf-8', 'sjis-win' ), 'KV', 'utf-8' );
+							}, $row );
+							list( $id, $short_zip, $zip, $pref_slug, $city_slug, $town_slug, $pref, $city, $town ) = $row;
+							$model->add( $zip, $pref, $city, $town, $pref_slug, $city_slug, $town_slug );
+						}
+						$done ++;
+						$rows ++;
+						if ( $done >= 3000 ) {
+							break;
+						}
+					}
+					if( $handle->eof() ){
+						unlink($csv);
+						delete_option('taro-geo-csv');
+					}
+					$response = array(
+						'next' => $handle->eof() ? 1 : 2,
+						'error' => false,
+						'rows' => $rows,
+						'message' => $this->i18n->s('地域情報%d件のインポートに成功しました。', $rows),
+					);
+
+					break;
+				default:
+					throw new \Exception($this->i18n->_('不正な処理です。'), 403);
+					break;
 			}
-
-			if( !file_exists($csv) ){
-				throw new \Exception($this->i18n->s('Zipファイルの展開に失敗しました。'), 500);
-			}
-			// Parse CSV
-			throw new \Exception($this->i18n->s('Zipファイルの展開%s', $csv), 500);
-
-
-
-			$response = array(
-				'error' => false,
-				'message' => $this->i18n->_('地域情報のインポートに成功しました。'),
-			);
 		}catch ( \Exception $e ){
 			$response = array(
+				'next' => 1,
+				'rows' => 0,
 				'error' => $e->getCode(),
 				'message' => $e->getMessage(),
 			);

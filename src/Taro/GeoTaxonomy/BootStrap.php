@@ -6,6 +6,7 @@ namespace Taro\GeoTaxonomy;
 use Taro\GeoTaxonomy\Admin\MetaBox;
 use Taro\GeoTaxonomy\Admin\Setting;
 use Taro\Common\Pattern\Application;
+use Taro\GeoTaxonomy\Models\Point;
 use Taro\GeoTaxonomy\Models\Zip;
 
 
@@ -30,6 +31,7 @@ class BootStrap extends Application
 			MetaBox::get_instance();
 			// Create tables
 			Zip::register();
+			Point::register();
 		}
 		add_action('init', array($this, 'init'));
 	}
@@ -46,6 +48,9 @@ class BootStrap extends Application
 				'hierarchical' => true,
 			));
 		}
+		// Register google map
+		$key = defined('TAROGEO_GOOGLE_KEY') ? TAROGEO_GOOGLE_KEY : '';
+		wp_register_script('google-map', "//maps.googleapis.com/maps/api/js?key={$key}&sensor=true", array(), null, true);
 	}
 
 }

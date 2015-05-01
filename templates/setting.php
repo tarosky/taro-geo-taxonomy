@@ -64,10 +64,32 @@ defined('ABSPATH') or die();
 			<input type="hidden" name="rows" value="0" />
 			<p class="description">
 				<?php echo $this->option['source']['description']; ?>
+				<?php $this->i18n->p('現在、%s件の地域情報が保存されています。', number_format(\Taro\GeoTaxonomy\Models\Zip::get_instance()->total())) ?>
 			</p>
 			<?php submit_button($this->i18n->s('インポート')) ?>
 			<pre></pre>
 		</form>
 	</div>
+
+	<hr />
+
+	<h3><span class="dashicons dashicons-update"></span> <?php $this->i18n->e('同期') ?></h3>
+
+	<div class="geo-importer">
+
+		<form id="taro-geo-sync-form" action="<?php echo admin_url('admin-ajax.php') ?>" method="post">
+			<input type="hidden" name="action" value="taro-geo-sync" />
+			<?php wp_nonce_field('taro-geo-sync', '_wpnonce', false) ?>
+			<input type="hidden" name="step" value="1" />
+			<input type="hidden" name="rows" value="0" />
+			<p class="description">
+				<?php $this->i18n->p('現在、%s件の市区町村が保存されています。これらの情報をタクソノミーとして保存します。保存されるのは市区町村までです。', number_format(\Taro\GeoTaxonomy\Models\Zip::get_instance()->city_total())) ?>
+			</p>
+			<?php submit_button($this->i18n->s('インポート')) ?>
+			<pre></pre>
+		</form>
+
+	</div>
+
 
 </div><!--- //.wrap -->

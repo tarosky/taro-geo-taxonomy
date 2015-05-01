@@ -91,6 +91,42 @@ SQL;
 	}
 
 	/**
+	 * Show city total
+	 *
+	 * @return int
+	 */
+	public function city_total(){
+		return (int) $this->get_var("SELECT COUNT(distinct prefecture, city) FROM {$this->table}");
+	}
+
+	/**
+	 * Get total row count
+	 *
+	 * @return int
+	 */
+	public function total(){
+		return (int) $this->get_var("SELECT COUNT(area_id) FROM {$this->table}");
+	}
+
+	/**
+	 * Get city list
+	 *
+	 * @param int $offset
+	 * @param int $limit
+	 *
+	 * @return array
+	 */
+	public function get_cities($offset = 0, $limit = 100){
+		$query = <<<SQL
+			SELECT DISTINCT
+				prefecture, city, prefecture_yomi, city_yomi
+				FROM {$this->table}
+			LIMIT %d, %d
+SQL;
+		return $this->get_results($query, $offset, $limit);
+	}
+
+	/**
 	 * Normalize zip
 	 *
 	 * @param string $zip
@@ -100,6 +136,7 @@ SQL;
 	public function normalize_zip($zip){
 		return preg_replace('/[^0-9]/', '', $zip);
 	}
+
 
 	/**
 	 * Format zip

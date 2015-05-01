@@ -21,6 +21,12 @@ use Taro\Common\Utility\Internationalization;
  */
 abstract class Application extends Singleton
 {
+	/**
+	 * Current plugin version
+	 *
+	 * @var string
+	 */
+	protected $version = '1.0';
 
 	/**
 	 * Default option value
@@ -44,13 +50,17 @@ abstract class Application extends Singleton
 	 * Load template file
 	 *
 	 * @param string $template
+	 * @param array $args will be extract.
 	 */
-	public function load_template($template){
+	public function load_template($template, $args = array()){
 		if( false === strpos($template, '.php') ){
 			$template .= '.php';
 		}
 		$path = $this->root_dir.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR.$template;
 		if( file_exists($path) ){
+			if( $args ){
+				extract($args);
+			}
 			include $path;
 		}else{
 			trigger_error($this->i18n->s('テンプレートファイル%sは存在しません。', $path), E_USER_WARNING);

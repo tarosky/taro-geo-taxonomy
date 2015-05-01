@@ -41,7 +41,19 @@ class MetaBox extends Application
 				'priority' => 'high',
 			));
 			add_meta_box('taro-geo-taxonomy-box', $this->i18n->_('地域'), array($this, 'do_meta_box'), $post_type, $context['context'], $context['priority']);
+			// Remove original Taxonomy
+			remove_meta_box($this->taxonomy.'div', $post_type, 'side');
+			// Add CSS and JS
+			add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
 		}
+	}
+
+	/**
+	 * Enqueue Assets
+	 */
+	public function enqueue_assets(){
+		wp_enqueue_style('taro-geo-mb', $this->assets.'/css/edit-screen.css', array(), $this->version);
+		wp_enqueue_script('taro-geo-mb', $this->assets.'/js/dist/edit-screen.js', array('jquery-effects-highlight', 'google-map'), $this->version, true);
 	}
 
 	/**
@@ -50,7 +62,9 @@ class MetaBox extends Application
 	 * @param \WP_Post $post
 	 */
 	public function do_meta_box( \WP_Post $post ){
-		$this->load_template('meta-box');
+		$this->load_template('meta-box', array(
+			'post' => $post
+		));
 	}
 
 }

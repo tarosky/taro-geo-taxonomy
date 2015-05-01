@@ -26,6 +26,7 @@ class Setting extends Application
 			add_action('admin_menu', array($this, 'admin_menu'));
 			add_action('admin_init', array($this, 'admin_init'));
 			add_action('wp_ajax_taro-geo-import', array($this, 'import'));
+			add_action('wp_ajax_taro-geo-sync', array($this, 'sync'));
 			add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
 		}
 	}
@@ -176,6 +177,101 @@ class Setting extends Application
 						'error' => false,
 						'rows' => $rows,
 						'message' => $this->i18n->s('地域情報%d件のインポートに成功しました。', $rows),
+					);
+
+					break;
+				default:
+					throw new \Exception($this->i18n->_('不正な処理です。'), 403);
+					break;
+			}
+		}catch ( \Exception $e ){
+			$response = array(
+				'next' => 1,
+				'rows' => 0,
+				'error' => $e->getCode(),
+				'message' => $e->getMessage(),
+			);
+		}
+		wp_send_json($response);
+	}
+
+
+
+	/**
+	 * Sync Area Data
+	 */
+	public function sync(){
+		try{
+			if( !current_user_can('manage_options') || !$this->input->verify_nonce('taro-geo-sync') ){
+				throw new \Exception($this->i18n->_('あなたには権限がありません。'), 403);
+			}
+			// Check zip total
+			$zip = Zip::get_instance();
+			$total = $zip->city_total();
+			if( !$total ){
+				throw new \Exception($this->i18n->_('市区町村が登録されていません'), 404);
+			}
+			switch( $this->input->post('step') ){
+				case 1:
+					// Count total
+					$response = array(
+						'next' => 2,
+						'error' => false,
+						'rows' => 0,
+						'message' => $this->i18n->s('市区町村%d件を登録します……', $total),
+					);
+					break;
+				case 2:
+					// Current row
+					$rows = $this->input->post('rows');
+					$cities = $zip->get_cities($rows);
+					if( $cities ){
+						// Save prefecture
+						$prefectures = array();
+						foreach( $cities as $city ){
+							if( !isset($prefectures[$city->prefecture]) ){
+								$prefectures[$city->prefecture] = array(
+									'description' => $city->prefecture_yomi,
+								);
+							}
+						}
+						// Check term exists
+						foreach( $prefectures as $pref => $data){
+							if( ($term = term_exists($pref, $this->taxonomy)) ){
+								$prefectures[$pref]['term_id'] = $term['term_id'];
+								$prefectures[$pref]['term_taxonomy_id'] = $term['term_taxonomy_id'];
+							}else{
+								$term = wp_insert_term($pref, $this->taxonomy, array(
+									'description' => $data['description'],
+								));
+								if( !is_wp_error($term) ){
+									$prefectures[$pref]['term_id'] = $term['term_id'];
+									$prefectures[$pref]['term_taxonomy_id'] = $term['term_taxonomy_id'];
+								}
+							}
+						}
+						// O.K. Let's save cities
+						foreach( $cities as $city ){
+							$parent_id = $prefectures[$city->prefecture]['term_id'];
+							if( !term_exists($city->city, $this->taxonomy, $parent_id) ){
+								wp_insert_term($city->city, $this->taxonomy, array(
+									'parent' => $parent_id,
+									'description' => $city->city_yomi,
+								));
+							}
+							$rows++;
+						}
+						$next = 2;
+						$message = $this->i18n->s('市区町村%d件を同期しました……', $rows);
+					}else{
+						$next = 1;
+						$message = $this->i18n->s('市区町村%d件の同期が完了しました。', $rows);
+					}
+					$response = array(
+						'next' => $next,
+						'error' => false,
+						'rows' => $rows,
+						'message' => $message,
 					);
 
 					break;

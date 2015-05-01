@@ -7,9 +7,9 @@
 (function ($) {
     'use strict';
 
-    // Form aciton
+    // Form action
     $(document).ready(function(){
-        $('#taro-geo-import-form').submit(function(e){
+        $('.geo-importer form').submit(function(e){
             e.preventDefault();
             var $form = $(this),
                 $pre = $form.find('pre');

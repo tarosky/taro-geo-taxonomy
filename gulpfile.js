@@ -53,9 +53,9 @@ gulp.task('jshint', function(){
 //        .pipe(gulp.dest('./assets/img'));
 //});
 
-// Build modernizr
-gulp.task('modernizr', function(){
-    return gulp.src(['./bower_components/modernizr/modernizr.js'])
+// Copy JS
+gulp.task('copyJs', function(){
+    return gulp.src(['./bower_components/jquery-tokeninput/src/jquery.tokeninput.js'])
         .pipe($.uglify())
         .pipe(gulp.dest('./assets/js/dist/'));
 });
@@ -68,7 +68,7 @@ gulp.task('watch',function(){
 });
 
 // Build
-gulp.task('build', ['jshint', 'js', 'sass', 'imagemin']);
+gulp.task('build', ['jshint', 'js', 'sass']);
 
 // Default Tasks
 gulp.task('default', ['watch']);

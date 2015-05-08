@@ -127,6 +127,57 @@ SQL;
 	}
 
 	/**
+	 * Search city with term
+	 *
+	 * @param string $s
+	 * @param int $parent_id
+	 *
+	 * @return array
+	 */
+	public function search_city($s, $parent_id = 0){
+		$wheres = array(
+			$this->db->prepare("( t.name LIKE %s OR tt.description LIKE %s )", "%{$s}%", "%{$s}%")
+		);
+		if( $parent_id ){
+			array_unshift($wheres, $this->db->prepare("( tt.parent = %d )", $parent_id));
+		}else{
+			array_unshift($wheres, "( tt.parent IS NOT 0 )");
+		}
+		array_unshift($wheres, $this->db->prepare("( tt.taxonomy = %s )", $this->taxonomy));
+		$where_clause = implode(' AND ', $wheres);
+		$query = <<<SQL
+			SELECT t.term_id, t.name, tt.description
+			FROM {$this->db->terms} AS t
+			INNER JOIN {$this->db->term_taxonomy} AS tt
+			ON t.term_id = tt.term_id
+			WHERE {$where_clause}
+			ORDER BY t.term_id ASC
+SQL;
+		$result = $this->get_results($query);
+		return $result;
+	}
+
+	/**
+	 * Get address from zip
+	 *
+	 * @param string $zip
+	 * @param bool   $multiple
+	 *
+	 * @return null|array|\stdClass
+	 */
+	public function search_from_zip($zip, $multiple = false){
+		$query = <<<SQL
+			SELECT * FROM {$this->table}
+			WHERE zip LIKE %s
+SQL;
+		if( $multiple ){
+			return $this->get_results($query, "{$zip}%");
+		}else{
+			return $this->get_row($query, "{$zip}%");
+		}
+	}
+
+	/**
 	 * Normalize zip
 	 *
 	 * @param string $zip

@@ -4,6 +4,7 @@ namespace Taro\GeoTaxonomy\Admin;
 
 
 use Taro\Common\Pattern\Application;
+use Taro\GeoTaxonomy\Models\Point;
 use Taro\GeoTaxonomy\Models\Zip;
 
 
@@ -12,6 +13,7 @@ use Taro\GeoTaxonomy\Models\Zip;
  *
  * @package Taro\GeoTaxonomy\Admin
  * @property-read Zip $model
+ * @property-read Point $points
  */
 class MetaBox extends Application
 {
@@ -104,6 +106,15 @@ class MetaBox extends Application
 			update_post_meta($post->ID, '_zip', $this->input->post('zip'));
 			update_post_meta($post->ID, '_street', $this->input->post('street'));
 			update_post_meta($post->ID, '_building', $this->input->post('building'));
+			if( is_numeric($this->input->post('lat')) && is_numeric($this->input->post('lng')) ){
+				if( $this->points->point_count('post_address', $post_id) ){
+					$this->points->update_points('post_address', $post_id, $this->input->post('lat'), $this->input->post('lng'));
+				}else{
+					$this->points->add_point('post_address', $post_id, $this->input->post('lat'), $this->input->post('lng'));
+				}
+			}else{
+				$this->points->delete_point('post_address', $post_id);
+			}
 		}
 	}
 
@@ -166,6 +177,9 @@ class MetaBox extends Application
 		switch( $name ){
 			case 'model':
 				return Zip::get_instance();
+				break;
+			case 'points':
+				return Point::get_instance();
 				break;
 			default:
 				return parent::__get( $name );

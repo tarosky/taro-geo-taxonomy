@@ -37,17 +37,21 @@ $address = new \Taro\GeoTaxonomy\Helper\Address($post);
 		</td>
 	</tr>
 	<tr>
-		<th><label for="street">住所</label></th>
+		<th>住所</th>
 		<td>
-			<input class="regular-text" id="street" name="street" value="<?php echo esc_attr($address->street) ?>" > <span class="description">住所</span>
-			<input class="regular-text" id="building" name="building" value="<?php echo esc_attr($address->building) ?>" > <span class="description">建物</span>
+			<label><input class="regular-text" id="street" name="street" value="<?php echo esc_attr($address->street) ?>" > <span class="description">住所</span></label>
+			<label><input class="regular-text" id="building" name="building" value="<?php echo esc_attr($address->building) ?>" > <span class="description">建物</span></label>
+		</td>
+	</tr>
+	<tr>
+		<th>座標</th>
+		<td>
+			<label><input class="regular-text" id="lat" name="lat" value="<?php echo esc_attr($address->lat) ?>" readonly > <span class="description">緯度</span></label>
+			<label><input class="regular-text" id="lng" name="lng" value="<?php echo esc_attr($address->lng) ?>" readonly > <span class="description">経度</span></label>
+			<p class="description">
+				住所から検索して入力する <a id="taro-geo-searcher" class="button" href="#">検索</a> <a id="taro-geo-clearer" class="button" href="#">クリア</a>
+			</p>
 		</td>
 	</tr>
 </table>
-
-<div class="taro-gmap">
-	<p>
-		
-	</p>
-	<div id="taro-gmap-container"></div>
-</div>
+<div id="taro-gmap-container"></div>

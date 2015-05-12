@@ -41,6 +41,12 @@ class Model extends Application
 	 */
 	protected $where_clause = array();
 
+
+	/**
+	 * @var array
+	 */
+	protected $columns = array();
+
 	/**
 	 * Create SQL
 	 *
@@ -149,6 +155,19 @@ class Model extends Application
 		$dara_pl = $this->get_where_array($data);
 		$where_pl = $this->get_where_array($where);
 		return (int) $this->db->update($this->table, $data, $where, $dara_pl, $where_pl);
+	}
+
+
+	/**
+	 * Delete
+	 *
+	 * @param array $where
+	 *
+	 * @return false|int
+	 */
+	public function delete( array $where ){
+		$placeholders = $this->get_where_array($where);
+		return $this->db->delete($this->table, $where, $placeholders);
 	}
 
 	/**

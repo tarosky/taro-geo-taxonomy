@@ -134,7 +134,7 @@ class Address
 				}
 				break;
 			case 'latlng':
-				return Point::get_instance()->get_points('post_address', $this->post->ID, true);
+				return Point::get_instance()->get_point('post_address', $this->post->ID);
 				break;
 			default:
 				return null;

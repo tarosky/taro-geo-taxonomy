@@ -9,6 +9,17 @@ defined('ABSPATH') or die();
 /** @var WP_Post $post */
 
 $address = new \Taro\GeoTaxonomy\Helper\Address($post);
+
+
+/**
+ * taro_geo_before_meta_box
+ *
+ * Executed before meta box.
+ *
+ * @param WP_Post $post
+ * @param Taro\GeoTaxonomy\Helper\Address $address
+ */
+do_action('taro_geo_before_meta_box', $post, $address);
 ?>
 <table class="form-table">
 
@@ -55,3 +66,14 @@ $address = new \Taro\GeoTaxonomy\Helper\Address($post);
 	</tr>
 </table>
 <div id="taro-gmap-container"></div>
+<?php
+
+/**
+ * taro_geo_after_meta_box
+ *
+ * Executed after meta box.
+ *
+ * @param WP_Post $post
+ * @param Taro\GeoTaxonomy\Helper\Address $address
+ */
+do_action('taro_geo_after_meta_box', $post, $address);

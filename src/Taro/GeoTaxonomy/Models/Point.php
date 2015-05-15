@@ -60,8 +60,7 @@ SQL;
 				%s, %d, GeomFromText(%s), %s, %s
 			)
 SQL;
-		$query = $this->db->prepare($query, $key, $object_id, "POINT({$lng} {$lat})", $name, $desc);
-		return (bool) $this->db->query($query);
+		return (bool) $this->query($query, $key, $object_id, "POINT({$lng} {$lat})", $name, $desc);
 	}
 
 	/**
@@ -88,8 +87,46 @@ SQL;
 			$name, $desc, $key, $object_id);
 	}
 
-	public function update_point($point_id, $lat, $lng, $name, $desc){
+	/**
+	 * Update point by id
+	 *
+	 * @param int $point_id
+	 * @param float $lat
+	 * @param float $lng
+	 * @param string $name
+	 * @param string $desc
+	 *
+	 * @return int
+	 */
+	public function update_point($point_id, $lat, $lng, $name = '', $desc = ''){
+		$query = <<<SQL
+			UPDATE {$this->table}
+			SET latlng = GeomFromText(%s),
+			    point_name = %s,
+			    point_desc = %s
+			WHERE point_id = %d
+SQL;
+		return $this->query($query, "POINT({$lng} {$lat})", $name, $desc, $point_id);
+	}
 
+	/**
+	 * Update single point
+	 *
+	 * @param string $key
+	 * @param int $object_id
+	 * @param float $lat
+	 * @param float $lng
+	 * @param string $name
+	 * @param string $desc
+	 *
+	 * @return bool|int
+	 */
+	public function update_single_point($key, $object_id, $lat, $lng, $name = '', $desc = ''){
+		if( $point = $this->get_point($key, $object_id) ){
+			return $this->update_point($point->point_id, $lat, $lng, $name, $desc);
+		}else{
+			return $this->add_point($key, $object_id, $lat, $lng, $name, $desc);
+		}
 	}
 
 	/**
@@ -160,16 +197,65 @@ SQL;
 	protected function retrieve_points($key, $object_id, $single = true){
 		$query = <<<SQL
 			SELECT
+				point_id,
 				point_key, point_name, point_desc,
 				X(latlng) AS lng, Y(latlng) AS lat
 			FROM {$this->table}
-			WHERE point_key = %s AND object_id = %d
+			WHERE point_key = %s
+			  AND object_id = %d
 SQL;
 		if( $single ){
 			return $this->get_row($query, $key, $object_id);
 		}else{
 			return $this->get_results($query, $key, $object_id);
 		}
+	}
+
+	/**
+	 * Retrieve non geo point
+	 *
+	 * @param string $post_type
+	 * @param string $point_key
+	 * @param int $limit
+	 *
+	 * @return array
+	 */
+	public function retrieve_non_geo_posts( $post_type, $point_key, $limit = 1000 ){
+		$query = <<<SQL
+			SELECT * FROM {$this->db->posts}
+			WHERE post_type = %s
+			  AND ID NOT IN (
+			  	SELECT object_id FROM {$this->table}
+			  	WHERE point_key = %s
+			  )
+			LIMIT %d
+SQL;
+		return $this->get_results($query, $post_type, $point_key, $limit);
+	}
+
+	/**
+	 * Get latitude and longitude with GeoCoding
+	 *
+	 * @see https://developers.google.com/maps/documentation/geocoding/
+	 * @param string $address
+	 * @return \WP_Error|\stdClass
+	 */
+	public function geocode($address){
+		$endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?address='.rawurlencode($address);
+		$response = wp_remote_get($endpoint);
+		if( is_wp_error($response) ){
+			return $response;
+		}
+		$json = json_decode($response['body']);
+		if( !$json || 'OK' != $json->status ){
+			return new \WP_Error(500, '座標を取得できませんでした。');
+		}
+		foreach( $json->results as $result ){
+			if( $result->geometry ){
+				return $result->geometry->location;
+			}
+		}
+		return new \WP_Error(404, '座標を取得できませんでした。');
 	}
 
 }

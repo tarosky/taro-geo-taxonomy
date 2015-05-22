@@ -18,6 +18,83 @@ class Point extends Model
 	protected $version = '1.0';
 
 	/**
+	 * Constructor
+	 *
+	 * @param array $arguments
+	 */
+	protected function __construct( $arguments = array() ) {
+		add_filter('query_vars', array($this, 'query_vars'));
+		add_action('posts_join', array($this, 'posts_join'), 10, 2);
+		add_action('posts_where', array($this, 'posts_where'), 10, 2);
+	}
+
+	/**
+	 * Add query vars
+	 *
+	 * @param array $vars
+	 *
+	 * @return array
+	 */
+	public function query_vars($vars){
+		return array_merge($vars, array(
+			'no', 'so', 'ea', 'we'
+		));
+	}
+
+	/**
+	 * Detect if current query is valid
+	 *
+	 * @param \WP_Query $wp_query
+	 *
+	 * @return bool
+	 */
+	protected function is_valid_query( \WP_Query $wp_query ){
+		return (
+			$wp_query->get('no') && $wp_query->get('so') && $wp_query->get('ea') && $wp_query->get('we')
+		);
+	}
+
+	/**
+	 * Join with points
+	 *
+	 * @param string $join
+	 * @param \WP_Query $wp_query
+	 *
+	 * @return mixed
+	 */
+	public function posts_join($join, \WP_Query $wp_query){
+		if( $this->is_valid_query($wp_query) ){
+			$join .= <<<SQL
+			LEFT JOIN {$this->table} AS points
+			ON points.point_key = 'post_address' AND {$this->db->posts}.ID = points.object_id
+SQL;
+		}
+		return $join;
+	}
+
+	/**
+	 * Where with point
+	 *
+	 * @param string $where
+	 * @param \WP_Query $wp_query
+	 *
+	 * @return mixed
+	 */
+	public function posts_where($where, \WP_Query $wp_query){
+		if( $this->is_valid_query($wp_query) ){
+			$query = <<<SQL
+			AND MBRContains(GeomFromText(%s), points.latlng)
+SQL;
+			$where .= $this->db->prepare($query, sprintf('LINESTRING(%s %s, %s %s)',
+				$wp_query->get('ea'), $wp_query->get('no'),
+				$wp_query->get('we'), $wp_query->get('so')
+				));
+		}
+		return $where;
+	}
+
+
+	/**
 	 * Create points table
 	 *
 	 * @return string

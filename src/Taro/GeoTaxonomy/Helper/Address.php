@@ -82,6 +82,36 @@ class Address
 	}
 
 	/**
+	 * Get address
+	 *
+	 * @param bool $in_array
+	 *
+	 * @return array|string
+	 */
+	public function get($in_array = true){
+		$address = array_map(function($var){
+			if( isset($var->name) ){
+				return $var->name;
+			}else{
+				return $var ?: '';
+			}
+		}, array(
+			'prefecture' => $this->prefecture,
+			'city'       => $this->city,
+			'street'     => $this->street,
+			'building'   => $this->building
+		));
+		return $in_array ? $address : trim(implode(' ', $address));
+	}
+
+	/**
+	 * Print address
+	 */
+	public function the_address(){
+		echo $this->get(false);
+	}
+
+	/**
 	 * Getter
 	 *
 	 * @param string $name
@@ -141,5 +171,4 @@ class Address
 				break;
 		}
 	}
-
 }

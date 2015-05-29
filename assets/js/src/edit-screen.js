@@ -151,7 +151,6 @@
                         geocoder.geocode( {
                             address: address
                         }, function(results, status) {
-                            console.log(address, results);
                             if ( status == google.maps.GeocoderStatus.OK ) {
                                 marker.setPosition(results[0].geometry.location);
                                 setMap(results[0].geometry.location);

@@ -36,8 +36,6 @@ class BootStrap extends Application
 		add_action('init', array($this, 'init'));
 		// Add point model
 		Point::register();
-		// Ajax endpoint
-		PointSearch::get_instance();
 	}
 
 	/**

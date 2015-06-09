@@ -3,8 +3,3 @@
 /bower_components/
 .sass-cache
 /tmp/
-/assets/img/*
-!/assets/img/src
-/assets/js/*
-!/assets/js/src
-/assets/css/*

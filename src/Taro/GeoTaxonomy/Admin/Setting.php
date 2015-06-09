@@ -144,9 +144,10 @@ class Setting extends Application
 					// Current row
 					$rows = $this->input->post('rows');
 					$csv = get_option('taro-geo-csv');
-					if( !file_exists($csv) || !($handle = new \SplFileObject($csv)) ){
+					if( !file_exists($csv) ){
 						throw new \Exception($this->i18n->_('ファイルが存在しません。'), 403);
 					}
+					$handle = new \SplFileObject($csv);
 					// Parse CSV
 					$model = Zip::get_instance();
 					$handle->seek($rows);

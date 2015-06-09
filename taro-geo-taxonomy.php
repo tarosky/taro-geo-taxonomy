@@ -11,6 +11,6 @@
 
 require __DIR__.'/vendor/autoload.php';
 
-if( class_exists('Taro\\GeoTaxonomy\\Bootstrap') ){
+if( class_exists('Taro\\GeoTaxonomy\\BootStrap') ){
 	Taro\GeoTaxonomy\BootStrap::get_instance();
 }

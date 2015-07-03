@@ -4,6 +4,7 @@ namespace Taro\GeoTaxonomy\Utility;
 
 
 use Taro\GeoTaxonomy\Bootstrap;
+use Taro\GeoTaxonomy\Models\Zip;
 
 
 class Prefecture
@@ -161,5 +162,29 @@ SQL;
 	 */
 	public static function remove_tofuken($pref){
 		return preg_replace('/(都|府|県)$/u', '', $pref);
+	}
+
+	/**
+	 * 都道府県のタームを取得する
+	 *
+	 * @return array
+	 */
+	public static function get_pref_terms(){
+		$model = Zip::get_instance();
+		$areas = get_terms($model->taxonomy, array('hide_empty' => false, 'parent' => 0));
+		$return = array();
+		foreach( static::$prefs as $region => $prefs ){
+			$return[$region] = array();
+			foreach( $prefs as $pref ){
+				foreach( $areas as $area ){
+					if( $area->name === $pref ){
+						$return[$region][] = $area;
+						break;
+					}
+				}
+
+			}
+		}
+		return $return;
 	}
 }

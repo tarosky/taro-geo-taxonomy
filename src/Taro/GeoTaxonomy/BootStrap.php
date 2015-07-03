@@ -48,6 +48,11 @@ class BootStrap extends Application
 				'label' => $this->label,
 				'public' => true,
 				'hierarchical' => true,
+				'rewrite' => array(
+					'slug' => $this->taxonomy,
+					'with_front' => false,
+					'hierarchical' => true,
+				),
 			));
 		}
 		// Register google map

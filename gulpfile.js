@@ -55,7 +55,7 @@ gulp.task('jshint', function(){
 
 // Copy JS
 gulp.task('copyJs', function(){
-    return gulp.src(['./node_modules/jquery-tokeninput/dist/js/jquery.tokeninput.js'])
+    return gulp.src(['./node_modules/jquery-tokeninput/dist/js/jquery-tokeninput.min.js'])
         .pipe(gulp.dest('./assets/js/dist/'));
 });
 

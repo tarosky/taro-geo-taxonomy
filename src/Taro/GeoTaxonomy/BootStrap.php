@@ -58,7 +58,7 @@ class BootStrap extends Application
 		// Register google map
 		$key = defined('TAROGEO_GOOGLE_KEY') ? TAROGEO_GOOGLE_KEY : $this->option['api_key'];
 		wp_register_script('google-map', "//maps.googleapis.com/maps/api/js?key={$key}&sensor=true", array(), null, true);
-		wp_register_script('jquery-token-input', $this->assets.'/js/dist/jquery.tokeninput.js', array('jquery'), '1.6.1', true);
+		wp_register_script('jquery-token-input', $this->assets.'/js/dist/jquery-tokeninput.min.js', array('jquery'), '1.6.1', true);
 		wp_register_style('jquery-token-input', $this->assets.'/css/token-input.css', null, '1.6.1');
 	}
 

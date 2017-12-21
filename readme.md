@@ -1,10 +1,10 @@
 # Taro Geo Taxonomy
 
-Contributors: Takahashi_Fumiki  
+Contributors: Takahashi_Fumiki,tarosky
 Tags: Addrress, Japan, Map  
 Requires at least: 4.0  
-Tested up to: 4.1  
-Stable tag: 1.0  
+Tested up to: 4.9.1
+Stable tag: 1.1.0
 
 WordPress plugin to create geometric taxonomy.
 
@@ -27,6 +27,11 @@ This plugin has mainly 3 features.
 - Now you can start `gulp`. This starts watch task.
 
 ##  Changelog 
+
+### 1.1.0
+
+* Fix timeout bug.
+* Remove bower
 
 ### 1.0
 

@@ -55,8 +55,7 @@ gulp.task('jshint', function(){
 
 // Copy JS
 gulp.task('copyJs', function(){
-    return gulp.src(['./bower_components/jquery-tokeninput/src/jquery.tokeninput.js'])
-        .pipe($.uglify())
+    return gulp.src(['./node_modules/jquery-tokeninput/dist/js/jquery.tokeninput.js'])
         .pipe(gulp.dest('./assets/js/dist/'));
 });
 
@@ -68,7 +67,7 @@ gulp.task('watch',function(){
 });
 
 // Build
-gulp.task('build', ['jshint', 'js', 'sass']);
+gulp.task('build', ['jshint', 'js', 'sass', 'copyJs']);
 
 // Default Tasks
 gulp.task('default', ['watch']);

@@ -5,8 +5,7 @@
     "php": ">=5.3"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.4.*",
-    "phpdocumentor/phpdocumentor": "2.*",
+    "phpunit/phpunit": "^4.8.0",
     "wp-coding-standards/wpcs": "dev-master"
   },
   "license": "MIT",
@@ -22,5 +21,6 @@
       "Taro\\Common": "src/"
     }
   },
-  "minimum-stability": "stable"
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }

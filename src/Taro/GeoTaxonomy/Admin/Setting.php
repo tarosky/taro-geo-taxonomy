@@ -3,7 +3,6 @@
 namespace Taro\GeoTaxonomy\Admin;
 
 
-use phpDocumentor\Transformer\Exception;
 use Taro\Common\Pattern\Application;
 use Taro\GeoTaxonomy\Models\Zip;
 
@@ -13,8 +12,7 @@ use Taro\GeoTaxonomy\Models\Zip;
  *
  * @package Taro\GeoTaxonomy\Admin
  */
-class Setting extends Application
-{
+class Setting extends Application {
 
 	/**
 	 * Construct
@@ -22,12 +20,12 @@ class Setting extends Application
 	 * @param array $arguments
 	 */
 	protected function __construct( $arguments = array() ) {
-		if( is_admin() ){
-			add_action('admin_menu', array($this, 'admin_menu'));
-			add_action('admin_init', array($this, 'admin_init'));
-			add_action('wp_ajax_taro-geo-import', array($this, 'import'));
-			add_action('wp_ajax_taro-geo-sync', array($this, 'sync'));
-			add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
+		if ( is_admin() ) {
+			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+			add_action( 'admin_init', array( $this, 'admin_init' ) );
+			add_action( 'wp_ajax_taro-geo-import', array( $this, 'import' ) );
+			add_action( 'wp_ajax_taro-geo-sync', array( $this, 'sync' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		}
 	}
 
@@ -35,11 +33,11 @@ class Setting extends Application
 	 * Enqueue script
 	 */
 	public function enqueue_scripts(){
-		wp_enqueue_script('taro-geo-admin', $this->assets.'/js/dist/setting.js', array('jquery-effects-highlight'), filemtime($this->root_dir.'/assets/js/dist/setting.js'), true);
-		wp_localize_script('taro-geo-admin', 'TaroGeoVars', array(
-			'loading' => $this->i18n->_('読み込み中...'),
-		));
-		wp_enqueue_style('taro-geo-admin', $this->assets.'/css/admin.css', null, filemtime($this->root_dir.'/assets/css/admin.css'));
+		wp_enqueue_script( 'taro-geo-admin', $this->assets . '/js/dist/setting.js', array( 'jquery-effects-highlight' ), filemtime( $this->root_dir . '/assets/js/dist/setting.js' ), true );
+		wp_localize_script( 'taro-geo-admin', 'TaroGeoVars', array(
+			'loading' => $this->i18n->_( '読み込み中...' ),
+		) );
+		wp_enqueue_style( 'taro-geo-admin', $this->assets . '/css/admin.css', null, filemtime( $this->root_dir . '/assets/css/admin.css' ) );
 	}
 
 	/**
@@ -69,92 +67,105 @@ class Setting extends Application
 	 * Save settings
 	 */
 	public function admin_init(){
-		if( $this->input->verify_nonce('taro-geo-taxonomy') && current_user_can('manage_options')){
+		if ( $this->input->verify_nonce( 'taro-geo-taxonomy' ) && current_user_can( 'manage_options' ) ) {
 			// Save setting
 			$option = $this->option;
-			$option = array_merge($option, array(
-				'post_types' => (array) $this->input->post('post_types'),
-				'taxonomy' => (string) $this->input->post('taxonomy-name'),
-				'label' => (string) $this->input->post('taxonomy-label'),
-			));
-			update_option('taro-geo-setting', $option);
-			$message = $this->i18n->s('設定が更新されました。');
-			add_action('admin_notices', function() use ($message){
-				printf('<div class="updated"><p>%s</p></div>', $message);
-			});
+			$option = array_merge( $option, array(
+				'post_types' => (array) $this->input->post( 'post_types' ),
+				'taxonomy'   => (string) $this->input->post( 'taxonomy-name' ),
+				'label'      => (string) $this->input->post( 'taxonomy-label' ),
+			) );
+			update_option( 'taro-geo-setting', $option );
+			$message = $this->i18n->s( '設定が更新されました。' );
+			add_action( 'admin_notices', function () use ( $message ) {
+				printf( '<div class="updated"><p>%s</p></div>', $message );
+			} );
 		}
 	}
 
 	/**
 	 * Import area data
 	 */
-	public function import(){
-		try{
-			if( !current_user_can('manage_options') || !$this->input->verify_nonce('taro-geo-import') ){
-				throw new \Exception($this->i18n->_('あなたには権限がありません。'), 403);
+	public function import() {
+		try {
+			if ( ! current_user_can( 'manage_options' ) || ! $this->input->verify_nonce( 'taro-geo-import' ) ) {
+				throw new \Exception( $this->i18n->_( 'あなたには権限がありません。' ), 403 );
 			}
-			switch( $this->input->post('step') ){
+			switch ( $this->input->post( 'step' ) ) {
 				case 1:
 					// Check temp dir
 					$temp_dir = sys_get_temp_dir();
-					if( !is_writable($temp_dir) ){
-						throw new \Exception($this->i18n->s('一時ディレクトリに書き込みができませんでした。'), 500);
+					if ( ! is_writable( $temp_dir ) ) {
+						throw new \Exception( $this->i18n->s( '一時ディレクトリに書き込みができませんでした。' ), 500 );
 					}
+					/**
+					 * taro_geo_taxonomy_timeout
+					 *
+					 * Execution time to get CSV file.
+					 *
+					 * @param int $time Timeout.
+					 *
+					 * @return int
+					 */
+					$default_timelimit = apply_filters( 'taro_geo_taxonomy_timeout', 180 );
+					set_time_limit( 180 );
 					// Get zip
-					$response = wp_remote_get($this->option['source']['url']);
-					if( is_wp_error($response) ){
-						throw new \Exception($response->get_error_message(), $response->get_error_code());
+					$response = wp_remote_get( $this->option['source']['url'], [
+						'timeout'     => 180,
+					] );
+					if ( is_wp_error( $response ) ) {
+						throw new \Exception( $response->get_error_message(), $response->get_error_code() );
 					}
 					// Save data
-					$zip_name = tempnam($temp_dir, 'taro-geo');
-					file_put_contents($zip_name, $response['body']);
-					if( !file_exists($zip_name) ){
-						throw new \Exception($this->i18n->s('一時ファイルの保存に失敗しました。'), 500);
+					$zip_name = tempnam( $temp_dir, 'taro-geo' );
+					file_put_contents( $zip_name, $response['body'] );
+					if ( ! file_exists( $zip_name ) ) {
+						throw new \Exception( $this->i18n->s( '一時ファイルの保存に失敗しました。' ), 500 );
 					}
 					// Extract zip
-					$csv = $zip_name.'.csv';
-					$zip = zip_open($zip_name);
-					if ($zip) {
-						while ($zip_entry = zip_read($zip)) {
-							$fp = fopen($csv, "w");
-							if (zip_entry_open($zip, $zip_entry, "r")) {
-								$buf = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
-								fwrite($fp,"$buf");
-								zip_entry_close($zip_entry);
-								fclose($fp);
+					$csv = $zip_name . '.csv';
+					$zip = zip_open( $zip_name );
+					if ( $zip ) {
+						while ( $zip_entry = zip_read( $zip ) ) {
+							$fp = fopen( $csv, "w" );
+							if ( zip_entry_open( $zip, $zip_entry, "r" ) ) {
+								$buf = zip_entry_read( $zip_entry, zip_entry_filesize( $zip_entry ) );
+								fwrite( $fp, "$buf" );
+								zip_entry_close( $zip_entry );
+								fclose( $fp );
 							}
 						}
-						zip_close($zip);
-					}else{
-						throw new \Exception($this->i18n->s('Zipファイルの展開に失敗しました。'), 500);
+						zip_close( $zip );
+					} else {
+						throw new \Exception( $this->i18n->s( 'Zipファイルの展開に失敗しました。' ), 500 );
 					}
 
-					if( !file_exists($csv) ){
-						throw new \Exception($this->i18n->s('Zipファイルの展開に失敗しました。'), 500);
+					if ( ! file_exists( $csv ) ) {
+						throw new \Exception( $this->i18n->s( 'Zipファイルの展開に失敗しました。' ), 500 );
 					}
-					update_option('taro-geo-csv', $csv);
+					update_option( 'taro-geo-csv', $csv );
 					$response = array(
-						'next' => 2,
-						'error' => false,
-						'rows' => 0,
-						'message' => $this->i18n->s('CSVファイルを取得しました……'),
+						'next'    => 2,
+						'error'   => false,
+						'rows'    => 0,
+						'message' => $this->i18n->s( 'CSVファイルを取得しました……' ),
 					);
 					break;
 				case 2:
 					// Current row
-					$rows = $this->input->post('rows');
-					$csv = get_option('taro-geo-csv');
-					if( !file_exists($csv) ){
-						throw new \Exception($this->i18n->_('ファイルが存在しません。'), 403);
+					$rows = $this->input->post( 'rows' );
+					$csv  = get_option( 'taro-geo-csv' );
+					if ( ! file_exists( $csv ) ) {
+						throw new \Exception( $this->i18n->_( 'ファイルが存在しません。' ), 403 );
 					}
-					$handle = new \SplFileObject($csv);
+					$handle = new \SplFileObject( $csv );
 					// Parse CSV
 					$model = Zip::get_instance();
-					$handle->seek($rows);
+					$handle->seek( $rows );
 					// Iteration
-					set_time_limit(0);
+					set_time_limit( 0 );
 					$done = 0;
-					while( !$handle->eof() ) {
+					while ( ! $handle->eof() ) {
 						$row = $handle->fgetcsv();
 						if ( count( $row ) > 7 ) {
 							$row = array_map( function ( $cell ) {
@@ -169,31 +180,31 @@ class Setting extends Application
 							break;
 						}
 					}
-					if( $handle->eof() ){
-						unlink($csv);
-						delete_option('taro-geo-csv');
+					if ( $handle->eof() ) {
+						unlink( $csv );
+						delete_option( 'taro-geo-csv' );
 					}
 					$response = array(
-						'next' => $handle->eof() ? 1 : 2,
-						'error' => false,
-						'rows' => $rows,
-						'message' => $this->i18n->s('地域情報%d件のインポートに成功しました。', $rows),
+						'next'    => $handle->eof() ? 1 : 2,
+						'error'   => false,
+						'rows'    => $rows,
+						'message' => $this->i18n->s( '地域情報%d件のインポートに成功しました。', $rows ),
 					);
 
 					break;
 				default:
-					throw new \Exception($this->i18n->_('不正な処理です。'), 403);
+					throw new \Exception( $this->i18n->_( '不正な処理です。' ), 403 );
 					break;
 			}
-		}catch ( \Exception $e ){
+		} catch ( \Exception $e ) {
 			$response = array(
-				'next' => 1,
-				'rows' => 0,
-				'error' => $e->getCode(),
+				'next'    => 1,
+				'rows'    => 0,
+				'error'   => $e->getCode(),
 				'message' => $e->getMessage(),
 			);
 		}
-		wp_send_json($response);
+		wp_send_json( $response );
 	}
 
 

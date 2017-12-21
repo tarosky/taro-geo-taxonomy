@@ -151,7 +151,8 @@ class MetaBox extends Application
 		wp_enqueue_script('taro-geo-mb', $this->assets.'/js/dist/edit-screen.js', array('jquery-effects-highlight', 'jquery-token-input', 'google-map'), $this->version, true);
 		wp_localize_script('taro-geo-mb', 'TaroGeo', array(
 			'token' => admin_url('admin-ajax.php?action=geo_token_input'),
-			'zip'   => admin_url('admin-ajax.php?action=admin_zip_search')
+			'zip'   => admin_url('admin-ajax.php?action=admin_zip_search'),
+			'key'   => $this->option['api_key'],
 		));
 	}
 

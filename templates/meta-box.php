@@ -66,6 +66,9 @@ do_action('taro_geo_before_meta_box', $post, $address);
 	</tr>
 </table>
 <div id="taro-gmap-container"></div>
+<?php if ( current_user_can( 'manage_options' ) ) : ?>
+<p class="description"><?php printf( $this->i18n->_( '正しく動作しない場合、<a href="%s">設定画面</a>を確認してください。' ), admin_url( 'options-general.php?page=taro-geo-taxonomy' ) ) ?></p>
+<?php endif; ?>
 <?php
 
 /**

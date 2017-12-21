@@ -74,6 +74,7 @@ class Setting extends Application {
 				'post_types' => (array) $this->input->post( 'post_types' ),
 				'taxonomy'   => (string) $this->input->post( 'taxonomy-name' ),
 				'label'      => (string) $this->input->post( 'taxonomy-label' ),
+				'api_key'    => (string) $this->input->post( 'google-api-key' ),
 			) );
 			update_option( 'taro-geo-setting', $option );
 			$message = $this->i18n->s( '設定が更新されました。' );

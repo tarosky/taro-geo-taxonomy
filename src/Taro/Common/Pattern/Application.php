@@ -43,6 +43,7 @@ abstract class Application extends Singleton
 				'description' => $this->i18n->s('郵便局が公開している<a href="%s">郵便番号データ</a>を元にしています。', 'http://www.post.japanpost.jp/zipcode/dl/kogaki-zip.html'),
 			),
 			'post_types' => array(),
+			'api_key' => '',
 		);
 	}
 

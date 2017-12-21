@@ -47,6 +47,15 @@ defined('ABSPATH') or die();
 					<?php endforeach; ?>
 				</td>
 			</tr>
+			<tr>
+				<th><label for="google-api-key"><?php $this->i18n->e( 'Google Maps APIキー' ) ?></label></th>
+				<td>
+					<input type="text" name="google-api-key" id="google-api-key" value="<?php echo esc_attr( $this->option['api_key'] ) ?>" class="regular-text" />
+					<p class="description">
+						<?php printf( $this->i18n->_( '<a href="%s" target="_blank">Google Maps Javascript API</a>のページからキーを取得できます。' ), 'https://developers.google.com/maps/documentation/javascript/' ) ?>
+					</p>
+				</td>
+			</tr>
 		</table>
 		<?php submit_button($this->i18n->s('更新')) ?>
 	</form>

@@ -4,7 +4,7 @@ Contributors: Takahashi_Fumiki,tarosky
 Tags: Addrress, Japan, Map  
 Requires at least: 4.0  
 Tested up to: 4.9.1  
-Stable tag: 1.1.0
+Stable tag: 1.1.2
 
 WordPress plugin to create geometric taxonomy.
 
@@ -32,6 +32,10 @@ If you want to develop locally, type `npm run watch`.
 Gulp will watch your changes.
 
 ##  Changelog 
+
+### 1.1.2
+
+* Now you can enter Google Map API key from option screen.
 
 ### 1.1.1
 

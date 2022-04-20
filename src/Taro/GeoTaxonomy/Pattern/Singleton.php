@@ -1,6 +1,6 @@
 <?php
 
-namespace Taro\Common\Pattern;
+namespace Taro\GeoTaxonomy\Pattern;
 
 
 /**

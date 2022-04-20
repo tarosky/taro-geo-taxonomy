@@ -1,14 +1,15 @@
 <?php
 
-namespace Taro\Common\Utility;
+namespace Taro\GeoTaxonomy\Utility;
 
 
-use Taro\Common\Pattern\Singleton;
+use Taro\GeoTaxonomy\Pattern\Singleton;
 
 /**
  * i18n class
  *
  * @package Taro\GeoTaxonomy\Utility
+ * @deprecated
  */
 class Internationalization extends Singleton
 {
@@ -18,6 +19,7 @@ class Internationalization extends Singleton
 	/**
 	 * Short hand for _e
 	 *
+	 * @deprecated
 	 * @param string $string
 	 */
 	public function e($string){
@@ -27,6 +29,7 @@ class Internationalization extends Singleton
 	/**
 	 * Short hand for __
 	 *
+	 * @deprecated
 	 * @param string $string
 	 *
 	 * @return string|void
@@ -38,6 +41,7 @@ class Internationalization extends Singleton
 	/**
 	 * Shorthand for sprintf + __
 	 *
+	 * @deprecated
 	 * @param string $string
 	 *
 	 * @return string|void
@@ -55,6 +59,7 @@ class Internationalization extends Singleton
 	/**
 	 * Short hand for printf + __
 	 *
+	 * @deprecated
 	 * @param string $string
 	 * @param bool $escape If true, esc_html will be apply.
 	 */

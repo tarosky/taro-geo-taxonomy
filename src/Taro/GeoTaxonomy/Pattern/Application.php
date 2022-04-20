@@ -1,10 +1,10 @@
 <?php
 
-namespace Taro\Common\Pattern;
+namespace Taro\GeoTaxonomy\Pattern;
 
 
-use Taro\Common\Utility\Input;
-use Taro\Common\Utility\Internationalization;
+use Taro\GeoTaxonomy\Utility\Input;
+use Taro\GeoTaxonomy\Utility\Internationalization;
 
 
 /**
@@ -14,8 +14,8 @@ use Taro\Common\Utility\Internationalization;
  * @property-read array $option
  * @property-read string $taxonomy
  * @property-read string $label
- * @property-read Input $input
- * @property-read Internationalization $i18n
+ * @property-read \Taro\GeoTaxonomy\Utility\Input $input
+ * @property-read \Taro\GeoTaxonomy\Utility\Internationalization $i18n
  * @property-read string $root_dir
  * @property-read string $assets
  */

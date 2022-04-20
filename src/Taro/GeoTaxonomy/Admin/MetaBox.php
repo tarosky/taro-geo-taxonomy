@@ -3,9 +3,9 @@
 namespace Taro\GeoTaxonomy\Admin;
 
 
-use Taro\Common\Pattern\Application;
 use Taro\GeoTaxonomy\Models\Point;
 use Taro\GeoTaxonomy\Models\Zip;
+use Taro\GeoTaxonomy\Pattern\Application;
 
 
 /**

@@ -1,8 +1,9 @@
 <?php
-namespace Taro\Common\Utility;
+namespace Taro\GeoTaxonomy\Utility;
 
 
-use Taro\Common\Pattern\Singleton;
+use Taro\GeoTaxonomy\Pattern\Singleton;
+use function wp_verify_nonce;
 
 
 /**

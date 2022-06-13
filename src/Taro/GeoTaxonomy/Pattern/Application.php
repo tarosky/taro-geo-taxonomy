@@ -12,6 +12,7 @@ use Taro\GeoTaxonomy\Utility\Internationalization;
  *
  * @package Taro\GeoTaxonomy\Pattern
  * @property-read array $option
+ * @property-read string $google_api_key
  * @property-read string $taxonomy
  * @property-read string $label
  * @property-read \Taro\GeoTaxonomy\Utility\Input $input
@@ -19,8 +20,7 @@ use Taro\GeoTaxonomy\Utility\Internationalization;
  * @property-read string $root_dir
  * @property-read string $assets
  */
-abstract class Application extends Singleton
-{
+abstract class Application extends Singleton {
 	/**
 	 * Current plugin version
 	 *
@@ -33,17 +33,17 @@ abstract class Application extends Singleton
 	 *
 	 * @return array
 	 */
-	private function get_default_option(){
+	private function get_default_option() {
 		return array(
-			'taxonomy' => 'area',
-			'label'    => $this->i18n->_('地域'),
-			'source' => array(
-				'label' => '日本',
-				'url' => 'http://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip',
-				'description' => $this->i18n->s('郵便局が公開している<a href="%s">郵便番号データ</a>を元にしています。', 'http://www.post.japanpost.jp/zipcode/dl/kogaki-zip.html'),
+			'taxonomy'   => 'area',
+			'label'      => __( '地域', 'taro-geo-tax' ),
+			'source'     => array(
+				'label'       => '日本',
+				'url'         => 'http://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip',
+				'description' => sprintf( __( '郵便局が公開している<a href="%s">郵便番号データ</a>を元にしています。', 'taro-geo-tax' ), 'http://www.post.japanpost.jp/zipcode/dl/kogaki-zip.html' ),
 			),
 			'post_types' => array(),
-			'api_key' => '',
+			'api_key'    => '',
 		);
 	}
 
@@ -53,18 +53,18 @@ abstract class Application extends Singleton
 	 * @param string $template
 	 * @param array $args will be extract.
 	 */
-	public function load_template($template, $args = array()){
-		if( false === strpos($template, '.php') ){
+	public function load_template( $template, $args = array() ) {
+		if ( false === strpos( $template, '.php' ) ) {
 			$template .= '.php';
 		}
-		$path = $this->root_dir.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR.$template;
-		if( file_exists($path) ){
-			if( $args ){
-				extract($args);
+		$path = $this->root_dir . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $template;
+		if ( file_exists( $path ) ) {
+			if ( $args ) {
+				extract( $args );
 			}
 			include $path;
-		}else{
-			trigger_error($this->i18n->s('テンプレートファイル%sは存在しません。', $path), E_USER_WARNING);
+		} else {
+			trigger_error( sprintf( __( 'テンプレートファイル%sは存在しません。', 'taro-geo-tax' ), $path ), E_USER_WARNING );
 		}
 	}
 
@@ -75,47 +75,45 @@ abstract class Application extends Singleton
 	 *
 	 * @return bool
 	 */
-	public function is_supported($post_type){
-		return false !== array_search($post_type, $this->option['post_types']);
+	public function is_supported( $post_type ) {
+		return false !== array_search( $post_type, $this->option[ 'post_types' ] );
 	}
 
 	/**
 	 * Getter
 	 *
-	 * @param string $name
+	 * @param string $name Property name.
 	 *
-	 * @return null|static
+	 * @return mixed
 	 */
-	public function __get($name){
-		switch( $name ){
+	public function __get( $name ) {
+		switch ( $name ) {
 			case 'option':
-				$saved_option = get_option('taro-geo-setting', array());
-				foreach( $this->get_default_option() as $key => $value ){
-					if( !isset($saved_option[ $key ]) ){
+				$saved_option = get_option( 'taro-geo-setting', array() );
+				foreach ( $this->get_default_option() as $key => $value ) {
+					if ( ! isset( $saved_option[ $key ] ) ) {
 						$saved_option[ $key ] = $value;
 					}
 				}
+
 				return $saved_option;
-				break;
+			case 'google_api_key':
+				$key = defined( 'TAROGEO_GOOGLE_KEY' ) ? TAROGEO_GOOGLE_KEY : $this->option[ 'api_key' ];
+				return $key;
 			case 'label':
 			case 'taxonomy':
-				return $this->option[$name];
-				break;
+				return $this->option[ $name ];
 			case 'input':
 				return Input::get_instance();
 				break;
 			case 'i18n':
 				return Internationalization::get_instance();
-				break;
 			case 'root_dir':
-				return dirname(dirname(dirname(dirname(dirname(__FILE__)))));
-				break;
+				return dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) );
 			case 'assets':
-				return untrailingslashit(plugin_dir_url($this->root_dir.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'index.css'));
-				break;
+				return untrailingslashit( plugin_dir_url( $this->root_dir . DIRECTORY_SEPARATOR . 'dist' . DIRECTORY_SEPARATOR . 'index.css' ) );
 			default:
 				return null;
-				break;
 		}
 	}
 }

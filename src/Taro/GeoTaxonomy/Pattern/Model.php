@@ -190,6 +190,15 @@ class Model extends Application
 	}
 
 	/**
+	 * Get MySQL
+	 *
+	 * @return string
+	 */
+	public function mysql_version() {
+		return preg_replace( '/[^\d.]/u', '', $this->get_var( 'select version()' ) );
+	}
+
+	/**
 	 * Magic method overrode
 	 *
 	 * @param string $name
@@ -217,7 +226,7 @@ class Model extends Application
 	}
 
 	/**
-	 *
+	 * Getter.
 	 *
 	 * @param string $name
 	 *

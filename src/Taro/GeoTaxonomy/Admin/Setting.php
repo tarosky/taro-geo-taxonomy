@@ -33,11 +33,11 @@ class Setting extends Application {
 	 * Enqueue script
 	 */
 	public function enqueue_scripts(){
-		wp_enqueue_script( 'taro-geo-admin', $this->assets . '/js/dist/setting.js', array( 'jquery-effects-highlight' ), filemtime( $this->root_dir . '/assets/js/dist/setting.js' ), true );
+		wp_enqueue_script( 'taro-geo-admin', $this->assets . '/js/setting.js', array( 'jquery-effects-highlight' ), filemtime( $this->root_dir . '/dist/js/setting.js' ), true );
 		wp_localize_script( 'taro-geo-admin', 'TaroGeoVars', array(
 			'loading' => $this->i18n->_( '読み込み中...' ),
 		) );
-		wp_enqueue_style( 'taro-geo-admin', $this->assets . '/css/admin.css', null, filemtime( $this->root_dir . '/assets/css/admin.css' ) );
+		wp_enqueue_style( 'taro-geo-admin', $this->assets . '/css/admin.css', null, filemtime( $this->root_dir . '/dist/css/admin.css' ) );
 	}
 
 	/**

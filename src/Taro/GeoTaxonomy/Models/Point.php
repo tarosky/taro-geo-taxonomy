@@ -14,7 +14,7 @@ class Point extends Model {
 
 	protected $name = 'points';
 
-	protected $version = '1.0';
+	protected $version = '2.2';
 
 	/**
 	 * Constructor
@@ -104,6 +104,7 @@ SQL;
 	 * @return string
 	 */
 	protected function create_sql() {
+		$charset = $this->db->get_charset_collate();
 		return <<<SQL
 			CREATE TABLE `{$this->table}` (
 				point_id    BIGINT NOT NULL AUTO_INCREMENT,
@@ -112,12 +113,15 @@ SQL;
 				latlng      GEOMETRY NOT NULL,
 				point_name  VARCHAR(256) NOT NULL,
 				point_desc TEXT NOT NULL,
+				src VARCHAR(20) NOT NULL DEFAULT 'google',
+				updated DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 				PRIMARY KEY (point_id),
 				INDEX from_key (point_key, object_id),
 				INDEX from_id (object_id),
 				INDEX from_name (point_key, point_name(9)),
-				SPATIAL KEY (latlng)
-			) ENGINE = MyISAM DEFAULT CHARSET utf8
+				INDEX by_date (updated, src),
+				SPATIAL KEY from_latlng (latlng)
+			) ENGINE = InnoDB {$charset}
 SQL;
 	}
 
@@ -136,13 +140,13 @@ SQL;
 	public function add_point( $key, $object_id, $lat, $lng, $name = '', $desc = '' ) {
 		$query = <<<SQL
 			INSERT INTO {$this->table} (
-				point_key, object_id, latlng, point_name, point_desc
+				point_key, object_id, latlng, point_name, point_desc, updated
 			) VALUES (
-				%s, %d, ST_GeomFromText(%s), %s, %s
+				%s, %d, ST_GeomFromText(%s), %s, %s, %s
 			)
 SQL;
 
-		return (bool) $this->query( $query, $key, $object_id, "POINT({$lng} {$lat})", $name, $desc );
+		return (bool) $this->query( $query, $key, $object_id, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ) );
 	}
 
 	/**
@@ -162,12 +166,12 @@ SQL;
 			UPDATE {$this->table}
 			SET latlng = ST_GeomFromText(%s),
 				point_name = %s,
-				point_desc = %s
+				point_desc = %s,
+				updated    = %s
 			WHERE point_key = %s AND object_id = %d
 SQL;
 
-		return $this->query( $query, "POINT({$lng} {$lat})",
-			$name, $desc, $key, $object_id );
+		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ), $key, $object_id );
 	}
 
 	/**
@@ -186,11 +190,12 @@ SQL;
 			UPDATE {$this->table}
 			SET latlng = ST_GeomFromText(%s),
 			    point_name = %s,
-			    point_desc = %s
+			    point_desc = %s,
+			    updated    = %s,
 			WHERE point_id = %d
 SQL;
 
-		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, $point_id );
+		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ), $point_id );
 	}
 
 	/**
@@ -317,6 +322,31 @@ SQL;
 SQL;
 
 		return $this->get_results( $query, $post_type, $point_key, $limit );
+	}
+
+	/**
+	 * Get points to be refreshed.
+	 *
+	 * @param array $args Arguments.
+	 * @return \stdClass[]
+	 */
+	public function get_points_to_be_refreshed( $args = [] ) {
+		$args = wp_parse_args( $args, [
+			'limit'  => 10,
+			'order'  => 'DESC',
+			'src'    => 'google',
+			'offset' => 86400,
+		] );
+		$order = ( $args['order'] === 'DESC' ) ? 'DESC' : 'ASC';
+		$query = <<<SQL
+			SELECT * FROM {$this->table}
+			WHERE updated < %s
+			  AND src = %s
+			ORDER BY updated {$order}
+			LIMIT %d
+SQL;
+		$date = date_i18n( 'Y-m-d H:i:s', current_time( 'timestamp' ) - $args['offset'] );
+		return $this->get_results( $query, $date, $args['src'], $args['limit'] );
 	}
 
 	/**

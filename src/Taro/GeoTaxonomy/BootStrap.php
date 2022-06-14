@@ -49,7 +49,7 @@ class BootStrap extends Application {
 	public function init() {
 		// Create taxonomy
 		if ( $this->taxonomy && $this->label ) {
-			register_taxonomy( $this->taxonomy, $this->option[ 'post_types' ], array(
+			register_taxonomy( $this->taxonomy, $this->option['post_types'], array(
 				'label'        => $this->label,
 				'public'       => true,
 				'hierarchical' => true,

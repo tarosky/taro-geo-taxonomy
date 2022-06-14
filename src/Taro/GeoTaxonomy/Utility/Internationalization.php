@@ -10,9 +10,10 @@ use Taro\GeoTaxonomy\Pattern\Singleton;
  *
  * @package Taro\GeoTaxonomy\Utility
  * @deprecated
+ *
  */
-class Internationalization extends Singleton
-{
+class Internationalization extends Singleton {
+
 
 	const DOMAIN = 'taro-geo-tax';
 
@@ -22,8 +23,8 @@ class Internationalization extends Singleton
 	 * @deprecated
 	 * @param string $string
 	 */
-	public function e($string){
-		echo $this->_($string);
+	public function e( $string ) {
+		echo $this->_( $string );
 	}
 
 	/**
@@ -34,8 +35,9 @@ class Internationalization extends Singleton
 	 *
 	 * @return string|void
 	 */
-	public function _($string){
-		return __($string, self::DOMAIN);
+	public function _( $string ) {
+		// phpcs:ignore
+		return __( $string, self::DOMAIN );
 	}
 
 	/**
@@ -46,13 +48,13 @@ class Internationalization extends Singleton
 	 *
 	 * @return string|void
 	 */
-	public function s($string){
+	public function s( $string ) {
 		$args = func_get_args();
-		if( 2 > count($args) ){
-			return $this->_($string);
-		}else{
-			$args[0] = $this->_($string);
-			return call_user_func_array('sprintf', $args);
+		if ( 2 > count( $args ) ) {
+			return $this->_( $string );
+		} else {
+			$args[0] = $this->_( $string );
+			return call_user_func_array( 'sprintf', $args );
 		}
 	}
 
@@ -63,10 +65,10 @@ class Internationalization extends Singleton
 	 * @param string $string
 	 * @param bool $escape If true, esc_html will be apply.
 	 */
-	public function p($string, $escape = false){
-		$str = call_user_func_array(array($this, 's'), func_get_args());
-		if( $escape ){
-			$str = esc_html($str);
+	public function p( $string, $escape = false ) {
+		$str = call_user_func_array( array( $this, 's' ), func_get_args() );
+		if ( $escape ) {
+			$str = esc_html( $str );
 		}
 		echo $str;
 	}

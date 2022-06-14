@@ -76,7 +76,7 @@ class Address {
 			'parent'     => $pref_id,
 			'hide_empty' => false,
 			'order'      => 'ASC',
-			'orderby'    => 'id'
+			'orderby'    => 'id',
 		) );
 
 		return is_wp_error( $cities ) ? array() : $cities;
@@ -90,19 +90,20 @@ class Address {
 	 * @return array|string
 	 */
 	public function get( $in_array = true ) {
-		$address = array_map( function ( $var ) {
+		$address_parts = [
+			'zip'        => $this->zip,
+			'prefecture' => $this->prefecture,
+			'city'       => $this->city,
+			'street'     => $this->street,
+			'building'   => $this->building,
+		];
+		$address       = array_map( function ( $var ) {
 			if ( isset( $var->name ) ) {
 				return $var->name;
 			} else {
 				return $var ?: '';
 			}
-		}, array(
-			'zip'        => $this->zip,
-			'prefecture' => $this->prefecture,
-			'city'       => $this->city,
-			'street'     => $this->street,
-			'building'   => $this->building
-		) );
+		}, $address_parts );
 
 		return $in_array ? $address : trim( implode( ' ', $address ) );
 	}
@@ -121,42 +122,42 @@ class Address {
 	 * @return string
 	 */
 	public function embed_gmap( $args = [] ) {
-		$args = wp_parse_args( $args, [
+		$args   = wp_parse_args( $args, [
 			'width'           => 640,
 			'height'          => 400,
 			'fullwidth'       => true,
 			'class'           => 'taro-geo-taxonomy-gmap',
 			'loading'         => 'lazy',
 			'allowfullscreen' => true,
-			'referrerpolicy'  => 'no-referrer-when-downgrade'
+			'referrerpolicy'  => 'no-referrer-when-downgrade',
 		] );
-		$key = $this->model->google_api_key;
+		$key    = $this->model->google_api_key;
 		$styles = [ 'border:0' ];
 		if ( $args['fullwidth'] ) {
 			$styles[] = 'width:100%';
 		}
 		$attributes = [
-			'width'          => $args[ 'width' ],
-			'height'         => $args[ 'height' ],
-			'class'          => $args[ 'class' ],
-			'loading'        => $args[ 'loading' ],
-			'referrerpolicy' => $args[ 'referrerpolicy' ],
+			'width'          => $args['width'],
+			'height'         => $args['height'],
+			'class'          => $args['class'],
+			'loading'        => $args['loading'],
+			'referrerpolicy' => $args['referrerpolicy'],
 			'style'          => implode( ';', $styles ),
 		];
 		if ( $args['allowfullscreen'] ) {
 			$attributes['allowfullscreen'] = true;
 		}
 		$address = $this->get();
-		$query = apply_filters( 'taro_geo_taxonomy_gmap_query', [
+		$query   = apply_filters( 'taro_geo_taxonomy_gmap_query', [
 			'key' => $key,
 			'q'   => implode( '+', [ $address['prefecture'], $address['city'], $address['street'] ] ),
 		], $this );
-		$q = [];
+		$q       = [];
 		foreach ( $query as $param => $value ) {
 			$q[] = sprintf( '%s=%s', $param, rawurlencode( $value ) );
 		}
 		$attributes['src'] = 'https://www.google.com/maps/embed/v1/place?' . implode( '&', $q );
-		$html_attr = [];
+		$html_attr         = [];
 		foreach ( $attributes as $attr => $value ) {
 			switch ( $attr ) {
 				case 'src':
@@ -199,11 +200,11 @@ class Address {
 				if ( $this->terms && ! is_wp_error( $this->terms ) ) {
 					foreach ( $this->terms as $term ) {
 						if ( 'prefecture' === $name ) {
-							if ( 0 == $term->parent ) {
+							if ( 0 === $term->parent ) {
 								return $term;
 							}
 						} else {
-							if ( 0 != $term->parent ) {
+							if ( 0 !== $term->parent ) {
 								return $term;
 							}
 						}
@@ -221,7 +222,8 @@ class Address {
 				break;
 			case 'lat':
 			case 'lng':
-				if ( ( $point = $this->latlng ) ) {
+				$point = $this->latlng;
+				if ( $point ) {
 					return (float) $point->{$name};
 				} else {
 					return false;

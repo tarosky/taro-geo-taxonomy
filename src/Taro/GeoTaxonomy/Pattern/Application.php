@@ -76,7 +76,7 @@ abstract class Application extends Singleton {
 	 * @return bool
 	 */
 	public function is_supported( $post_type ) {
-		return false !== array_search( $post_type, $this->option[ 'post_types' ] );
+		return in_array( $post_type, $this->option[ 'post_types' ], true );
 	}
 
 	/**

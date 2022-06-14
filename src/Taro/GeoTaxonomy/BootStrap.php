@@ -6,6 +6,7 @@ namespace Taro\GeoTaxonomy;
 use Taro\GeoTaxonomy\Admin\MetaBox;
 use Taro\GeoTaxonomy\Admin\Setting;
 use Taro\GeoTaxonomy\Ajax\PointSearch;
+use Taro\GeoTaxonomy\Controllers\SeoMeta;
 use Taro\GeoTaxonomy\Models\Point;
 use Taro\GeoTaxonomy\Models\Zip;
 use Taro\GeoTaxonomy\Pattern\Application;
@@ -35,6 +36,8 @@ class BootStrap extends Application {
 		add_action( 'init', [ $this, 'init' ] );
 		// Add point model
 		Point::register();
+		// SEO register.
+		SeoMeta::get_instance();
 	}
 
 	/**

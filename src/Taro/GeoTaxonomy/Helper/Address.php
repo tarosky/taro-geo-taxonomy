@@ -97,6 +97,7 @@ class Address {
 				return $var ?: '';
 			}
 		}, array(
+			'zip'        => $this->zip,
 			'prefecture' => $this->prefecture,
 			'city'       => $this->city,
 			'street'     => $this->street,
@@ -111,6 +112,66 @@ class Address {
 	 */
 	public function the_address() {
 		echo $this->get( false );
+	}
+
+	/**
+	 * Get Google map.
+	 *
+	 * @param array $args Arugments.
+	 * @return string
+	 */
+	public function embed_gmap( $args = [] ) {
+		$args = wp_parse_args( $args, [
+			'width'           => 640,
+			'height'          => 400,
+			'fullwidth'       => true,
+			'class'           => 'taro-geo-taxonomy-gmap',
+			'loading'         => 'lazy',
+			'allowfullscreen' => true,
+			'referrerpolicy'  => 'no-referrer-when-downgrade'
+		] );
+		$key = $this->model->google_api_key;
+		$styles = [ 'border:0' ];
+		if ( $args['fullwidth'] ) {
+			$styles[] = 'width:100%';
+		}
+		$attributes = [
+			'width'          => $args[ 'width' ],
+			'height'         => $args[ 'height' ],
+			'class'          => $args[ 'class' ],
+			'loading'        => $args[ 'loading' ],
+			'referrerpolicy' => $args[ 'referrerpolicy' ],
+			'style'          => implode( ';', $styles ),
+		];
+		if ( $args['allowfullscreen'] ) {
+			$attributes['allowfullscreen'] = true;
+		}
+		$address = $this->get();
+		$query = apply_filters( 'taro_geo_taxonomy_gmap_query', [
+			'key' => $key,
+			'q'   => implode( '+', [ $address['prefecture'], $address['city'], $address['street'] ] ),
+		], $this );
+		$q = [];
+		foreach ( $query as $param => $value ) {
+			$q[] = sprintf( '%s=%s', $param, rawurlencode( $value ) );
+		}
+		$attributes['src'] = 'https://www.google.com/maps/embed/v1/place?' . implode( '&', $q );
+		$html_attr = [];
+		foreach ( $attributes as $attr => $value ) {
+			switch ( $attr ) {
+				case 'src':
+					$html_attr[] = sprintf( '%s="%s"', $attr, esc_url( $value ) );
+					break;
+				default:
+					if ( true === $value ) {
+						$html_attr[] = $attr;
+					} else {
+						$html_attr[] = sprintf( '%s="%s"', $attr, esc_attr( $value ) );
+					}
+					break;
+			}
+		}
+		return sprintf( '<iframe %s></iframe>', implode( ' ', $html_attr ) );
 	}
 
 	/**

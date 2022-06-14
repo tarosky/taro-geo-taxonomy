@@ -3,19 +3,18 @@
 namespace Taro\GeoTaxonomy\Models;
 
 
-use Taro\Common\Pattern\Model;
+use Taro\GeoTaxonomy\Pattern\Model;
 
 /**
  * Point class
  *
  * @package Taro\GeoTaxonomy\Models
  */
-class Point extends Model
-{
+class Point extends Model {
 
 	protected $name = 'points';
 
-	protected $version = '1.0';
+	protected $version = '2.2';
 
 	/**
 	 * Constructor
@@ -23,9 +22,9 @@ class Point extends Model
 	 * @param array $arguments
 	 */
 	protected function __construct( $arguments = array() ) {
-		add_filter('query_vars', array($this, 'query_vars'));
-		add_action('posts_join', array($this, 'posts_join'), 10, 2);
-		add_action('posts_where', array($this, 'posts_where'), 10, 2);
+		add_filter( 'query_vars', array( $this, 'query_vars' ) );
+		add_action( 'posts_join', array( $this, 'posts_join' ), 10, 2 );
+		add_action( 'posts_where', array( $this, 'posts_where' ), 10, 2 );
 	}
 
 	/**
@@ -35,10 +34,13 @@ class Point extends Model
 	 *
 	 * @return array
 	 */
-	public function query_vars($vars){
-		return array_merge($vars, array(
-			'no', 'so', 'ea', 'we'
-		));
+	public function query_vars( $vars ) {
+		return array_merge( $vars, array(
+			'no',
+			'so',
+			'ea',
+			'we'
+		) );
 	}
 
 	/**
@@ -48,9 +50,9 @@ class Point extends Model
 	 *
 	 * @return bool
 	 */
-	protected function is_valid_query( \WP_Query $wp_query ){
+	protected function is_valid_query( \WP_Query $wp_query ) {
 		return (
-			$wp_query->get('no') && $wp_query->get('so') && $wp_query->get('ea') && $wp_query->get('we')
+			$wp_query->get( 'no' ) && $wp_query->get( 'so' ) && $wp_query->get( 'ea' ) && $wp_query->get( 'we' )
 		);
 	}
 
@@ -62,13 +64,14 @@ class Point extends Model
 	 *
 	 * @return mixed
 	 */
-	public function posts_join($join, \WP_Query $wp_query){
-		if( $this->is_valid_query($wp_query) ){
+	public function posts_join( $join, \WP_Query $wp_query ) {
+		if ( $this->is_valid_query( $wp_query ) ) {
 			$join .= <<<SQL
 			LEFT JOIN {$this->table} AS points
 			ON points.point_key = 'post_address' AND {$this->db->posts}.ID = points.object_id
 SQL;
 		}
+
 		return $join;
 	}
 
@@ -80,16 +83,17 @@ SQL;
 	 *
 	 * @return mixed
 	 */
-	public function posts_where($where, \WP_Query $wp_query){
-		if( $this->is_valid_query($wp_query) ){
+	public function posts_where( $where, \WP_Query $wp_query ) {
+		if ( $this->is_valid_query( $wp_query ) ) {
 			$query = <<<SQL
 			AND MBRContains(GeomFromText(%s), points.latlng)
 SQL;
-			$where .= $this->db->prepare($query, sprintf('LINESTRING(%s %s, %s %s)',
-				$wp_query->get('ea'), $wp_query->get('no'),
-				$wp_query->get('we'), $wp_query->get('so')
-				));
+			$where .= $this->db->prepare( $query, sprintf( 'LINESTRING(%s %s, %s %s)',
+				$wp_query->get( 'ea' ), $wp_query->get( 'no' ),
+				$wp_query->get( 'we' ), $wp_query->get( 'so' )
+			) );
 		}
+
 		return $where;
 	}
 
@@ -100,6 +104,7 @@ SQL;
 	 * @return string
 	 */
 	protected function create_sql() {
+		$charset = $this->db->get_charset_collate();
 		return <<<SQL
 			CREATE TABLE `{$this->table}` (
 				point_id    BIGINT NOT NULL AUTO_INCREMENT,
@@ -108,12 +113,15 @@ SQL;
 				latlng      GEOMETRY NOT NULL,
 				point_name  VARCHAR(256) NOT NULL,
 				point_desc TEXT NOT NULL,
+				src VARCHAR(20) NOT NULL DEFAULT 'google',
+				updated DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 				PRIMARY KEY (point_id),
 				INDEX from_key (point_key, object_id),
 				INDEX from_id (object_id),
 				INDEX from_name (point_key, point_name(9)),
-				SPATIAL KEY (latlng)
-			) ENGINE = MyISAM DEFAULT CHARSET utf8
+				INDEX by_date (updated, src),
+				SPATIAL KEY from_latlng (latlng)
+			) ENGINE = InnoDB {$charset}
 SQL;
 	}
 
@@ -129,15 +137,16 @@ SQL;
 	 *
 	 * @return bool
 	 */
-	public function add_point($key, $object_id, $lat, $lng, $name = '', $desc = ''){
+	public function add_point( $key, $object_id, $lat, $lng, $name = '', $desc = '' ) {
 		$query = <<<SQL
 			INSERT INTO {$this->table} (
-				point_key, object_id, latlng, point_name, point_desc
+				point_key, object_id, latlng, point_name, point_desc, updated
 			) VALUES (
-				%s, %d, GeomFromText(%s), %s, %s
+				%s, %d, ST_GeomFromText(%s), %s, %s, %s
 			)
 SQL;
-		return (bool) $this->query($query, $key, $object_id, "POINT({$lng} {$lat})", $name, $desc);
+
+		return (bool) $this->query( $query, $key, $object_id, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ) );
 	}
 
 	/**
@@ -152,16 +161,17 @@ SQL;
 	 *
 	 * @return int
 	 */
-	public function update_points($key, $object_id, $lat, $lng, $name = '', $desc = ''){
+	public function update_points( $key, $object_id, $lat, $lng, $name = '', $desc = '' ) {
 		$query = <<<SQL
 			UPDATE {$this->table}
-			SET latlng = GeomFromText(%s),
+			SET latlng = ST_GeomFromText(%s),
 				point_name = %s,
-				point_desc = %s
+				point_desc = %s,
+				updated    = %s
 			WHERE point_key = %s AND object_id = %d
 SQL;
-		return $this->query($query, "POINT({$lng} {$lat})",
-			$name, $desc, $key, $object_id);
+
+		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ), $key, $object_id );
 	}
 
 	/**
@@ -175,15 +185,17 @@ SQL;
 	 *
 	 * @return int
 	 */
-	public function update_point($point_id, $lat, $lng, $name = '', $desc = ''){
+	public function update_point( $point_id, $lat, $lng, $name = '', $desc = '' ) {
 		$query = <<<SQL
 			UPDATE {$this->table}
-			SET latlng = GeomFromText(%s),
+			SET latlng = ST_GeomFromText(%s),
 			    point_name = %s,
-			    point_desc = %s
+			    point_desc = %s,
+			    updated    = %s,
 			WHERE point_id = %d
 SQL;
-		return $this->query($query, "POINT({$lng} {$lat})", $name, $desc, $point_id);
+
+		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ), $point_id );
 	}
 
 	/**
@@ -198,11 +210,11 @@ SQL;
 	 *
 	 * @return bool|int
 	 */
-	public function update_single_point($key, $object_id, $lat, $lng, $name = '', $desc = ''){
-		if( $point = $this->get_point($key, $object_id) ){
-			return $this->update_point($point->point_id, $lat, $lng, $name, $desc);
-		}else{
-			return $this->add_point($key, $object_id, $lat, $lng, $name, $desc);
+	public function update_single_point( $key, $object_id, $lat, $lng, $name = '', $desc = '' ) {
+		if ( $point = $this->get_point( $key, $object_id ) ) {
+			return $this->update_point( $point->point_id, $lat, $lng, $name, $desc );
+		} else {
+			return $this->add_point( $key, $object_id, $lat, $lng, $name, $desc );
 		}
 	}
 
@@ -214,11 +226,11 @@ SQL;
 	 *
 	 * @return false|int
 	 */
-	public function delete_point($point_key, $object_id){
-		return $this->delete(array(
+	public function delete_point( $point_key, $object_id ) {
+		return $this->delete( array(
 			'point_key' => $point_key,
 			'object_id' => $object_id,
-		));
+		) );
 	}
 
 	/**
@@ -229,13 +241,14 @@ SQL;
 	 *
 	 * @return int
 	 */
-	public function point_count($key, $object_id){
+	public function point_count( $key, $object_id ) {
 		$query = <<<SQL
 			SELECT COUNT(point_id) FROM {$this->table}
 			WHERE point_key = %s
 			  AND object_id = %d
 SQL;
-		return (int) $this->get_var($query, $key, $object_id);
+
+		return (int) $this->get_var( $query, $key, $object_id );
 	}
 
 	/**
@@ -246,8 +259,8 @@ SQL;
 	 *
 	 * @return array
 	 */
-	public function get_points($key, $object_id){
-		return $this->retrieve_points($key, $object_id, false);
+	public function get_points( $key, $object_id ) {
+		return $this->retrieve_points( $key, $object_id, false );
 	}
 
 	/**
@@ -258,8 +271,8 @@ SQL;
 	 *
 	 * @return null|\stdClass
 	 */
-	public function get_point($key, $object_id){
-		return $this->retrieve_points($key, $object_id, true);
+	public function get_point( $key, $object_id ) {
+		return $this->retrieve_points( $key, $object_id, true );
 	}
 
 	/**
@@ -271,20 +284,20 @@ SQL;
 	 *
 	 * @return null|\stdClass|array
 	 */
-	protected function retrieve_points($key, $object_id, $single = true){
+	protected function retrieve_points( $key, $object_id, $single = true ) {
 		$query = <<<SQL
 			SELECT
 				point_id,
 				point_key, point_name, point_desc,
-				X(latlng) AS lng, Y(latlng) AS lat
+				ST_X(latlng) AS lng, ST_Y(latlng) AS lat
 			FROM {$this->table}
 			WHERE point_key = %s
 			  AND object_id = %d
 SQL;
-		if( $single ){
-			return $this->get_row($query, $key, $object_id);
-		}else{
-			return $this->get_results($query, $key, $object_id);
+		if ( $single ) {
+			return $this->get_row( $query, $key, $object_id );
+		} else {
+			return $this->get_results( $query, $key, $object_id );
 		}
 	}
 
@@ -297,7 +310,7 @@ SQL;
 	 *
 	 * @return array
 	 */
-	public function retrieve_non_geo_posts( $post_type, $point_key, $limit = 1000 ){
+	public function retrieve_non_geo_posts( $post_type, $point_key, $limit = 1000 ) {
 		$query = <<<SQL
 			SELECT * FROM {$this->db->posts}
 			WHERE post_type = %s
@@ -307,32 +320,61 @@ SQL;
 			  )
 			LIMIT %d
 SQL;
-		return $this->get_results($query, $post_type, $point_key, $limit);
+
+		return $this->get_results( $query, $post_type, $point_key, $limit );
+	}
+
+	/**
+	 * Get points to be refreshed.
+	 *
+	 * @param array $args Arguments.
+	 * @return \stdClass[]
+	 */
+	public function get_points_to_be_refreshed( $args = [] ) {
+		$args = wp_parse_args( $args, [
+			'limit'  => 10,
+			'order'  => 'DESC',
+			'src'    => 'google',
+			'offset' => 86400,
+		] );
+		$order = ( $args['order'] === 'DESC' ) ? 'DESC' : 'ASC';
+		$query = <<<SQL
+			SELECT * FROM {$this->table}
+			WHERE updated < %s
+			  AND src = %s
+			ORDER BY updated {$order}
+			LIMIT %d
+SQL;
+		$date = date_i18n( 'Y-m-d H:i:s', current_time( 'timestamp' ) - $args['offset'] );
+		return $this->get_results( $query, $date, $args['src'], $args['limit'] );
 	}
 
 	/**
 	 * Get latitude and longitude with GeoCoding
 	 *
 	 * @see https://developers.google.com/maps/documentation/geocoding/
+	 *
 	 * @param string $address
+	 *
 	 * @return \WP_Error|\stdClass
 	 */
-	public function geocode($address){
-		$endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?address='.rawurlencode($address);
-		$response = wp_remote_get($endpoint);
-		if( is_wp_error($response) ){
+	public function geocode( $address ) {
+		$endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?address=' . rawurlencode( $address );
+		$response = wp_remote_get( $endpoint );
+		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
-		$json = json_decode($response['body']);
-		if( !$json || 'OK' != $json->status ){
-			return new \WP_Error(500, '座標を取得できませんでした。');
+		$json = json_decode( $response[ 'body' ] );
+		if ( ! $json || 'OK' != $json->status ) {
+			return new \WP_Error( 500, '座標を取得できませんでした。' );
 		}
-		foreach( $json->results as $result ){
-			if( $result->geometry ){
+		foreach ( $json->results as $result ) {
+			if ( $result->geometry ) {
 				return $result->geometry->location;
 			}
 		}
-		return new \WP_Error(404, '座標を取得できませんでした。');
+
+		return new \WP_Error( 404, '座標を取得できませんでした。' );
 	}
 
 }

@@ -3,7 +3,7 @@
 namespace Taro\GeoTaxonomy\Models;
 
 
-use Taro\Common\Pattern\Model;
+use Taro\GeoTaxonomy\Pattern\Model;
 
 
 /**

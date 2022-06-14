@@ -5,3 +5,8 @@
 /tmp/
 assets/css
 assets/js/dist
+composer.lock
+package-lock.json
+wp-dependencies.json
+/dist/
+*.cache

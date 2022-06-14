@@ -4,9 +4,9 @@
  * Plugin URI: https://github.com/tarosky/taro-geo-taxonomy
  * Description: The WordPress plugin which creates
  * Author: Tarosky INC.
- * Version: 1.1.2
+ * Version: nightly
  * Author URI: https://tarosky.co.jp
- * License: MIT
+ * License: GPL-3.0-or-later
  */
 
 require __DIR__.'/vendor/autoload.php';

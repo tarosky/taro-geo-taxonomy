@@ -40,6 +40,7 @@ abstract class Application extends Singleton {
 			'source'     => array(
 				'label'       => '日本',
 				'url'         => 'http://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip',
+				// translators: %s is url.
 				'description' => sprintf( __( '郵便局が公開している<a href="%s">郵便番号データ</a>を元にしています。', 'taro-geo-tax' ), 'http://www.post.japanpost.jp/zipcode/dl/kogaki-zip.html' ),
 			),
 			'post_types' => array(),
@@ -60,10 +61,12 @@ abstract class Application extends Singleton {
 		$path = $this->root_dir . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $template;
 		if ( file_exists( $path ) ) {
 			if ( $args ) {
+				// phpcs:ignore
 				extract( $args );
 			}
 			include $path;
 		} else {
+			// translators: %s is file path.
 			trigger_error( sprintf( __( 'テンプレートファイル%sは存在しません。', 'taro-geo-tax' ), $path ), E_USER_WARNING );
 		}
 	}
@@ -76,7 +79,7 @@ abstract class Application extends Singleton {
 	 * @return bool
 	 */
 	public function is_supported( $post_type ) {
-		return in_array( $post_type, $this->option[ 'post_types' ], true );
+		return in_array( $post_type, $this->option['post_types'], true );
 	}
 
 	/**
@@ -98,7 +101,7 @@ abstract class Application extends Singleton {
 
 				return $saved_option;
 			case 'google_api_key':
-				$key = defined( 'TAROGEO_GOOGLE_KEY' ) ? TAROGEO_GOOGLE_KEY : $this->option[ 'api_key' ];
+				$key = defined( 'TAROGEO_GOOGLE_KEY' ) ? TAROGEO_GOOGLE_KEY : $this->option['api_key'];
 				return $key;
 			case 'label':
 			case 'taxonomy':

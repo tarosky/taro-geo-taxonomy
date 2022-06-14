@@ -39,7 +39,7 @@ class Point extends Model {
 			'no',
 			'so',
 			'ea',
-			'we'
+			'we',
 		) );
 	}
 
@@ -85,7 +85,7 @@ SQL;
 	 */
 	public function posts_where( $where, \WP_Query $wp_query ) {
 		if ( $this->is_valid_query( $wp_query ) ) {
-			$query = <<<SQL
+			$query  = <<<SQL
 			AND MBRContains(GeomFromText(%s), points.latlng)
 SQL;
 			$where .= $this->db->prepare( $query, sprintf( 'LINESTRING(%s %s, %s %s)',
@@ -211,7 +211,8 @@ SQL;
 	 * @return bool|int
 	 */
 	public function update_single_point( $key, $object_id, $lat, $lng, $name = '', $desc = '' ) {
-		if ( $point = $this->get_point( $key, $object_id ) ) {
+		$point = $this->get_point( $key, $object_id );
+		if ( $point ) {
 			return $this->update_point( $point->point_id, $lat, $lng, $name, $desc );
 		} else {
 			return $this->add_point( $key, $object_id, $lat, $lng, $name, $desc );
@@ -331,13 +332,13 @@ SQL;
 	 * @return \stdClass[]
 	 */
 	public function get_points_to_be_refreshed( $args = [] ) {
-		$args = wp_parse_args( $args, [
+		$args  = wp_parse_args( $args, [
 			'limit'  => 10,
 			'order'  => 'DESC',
 			'src'    => 'google',
 			'offset' => 86400,
 		] );
-		$order = ( $args['order'] === 'DESC' ) ? 'DESC' : 'ASC';
+		$order = ( 'DESC' === $args['order'] ) ? 'DESC' : 'ASC';
 		$query = <<<SQL
 			SELECT * FROM {$this->table}
 			WHERE updated < %s
@@ -345,6 +346,7 @@ SQL;
 			ORDER BY updated {$order}
 			LIMIT %d
 SQL;
+		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 		$date = date_i18n( 'Y-m-d H:i:s', current_time( 'timestamp' ) - $args['offset'] );
 		return $this->get_results( $query, $date, $args['src'], $args['limit'] );
 	}
@@ -364,8 +366,8 @@ SQL;
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
-		$json = json_decode( $response[ 'body' ] );
-		if ( ! $json || 'OK' != $json->status ) {
+		$json = json_decode( $response['body'] );
+		if ( ! $json || 'OK' !== $json->status ) {
 			return new \WP_Error( 500, '座標を取得できませんでした。' );
 		}
 		foreach ( $json->results as $result ) {

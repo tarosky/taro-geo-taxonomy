@@ -7,8 +7,8 @@ use Taro\GeoTaxonomy\Bootstrap;
 use Taro\GeoTaxonomy\Models\Zip;
 
 
-class Prefecture
-{
+class Prefecture {
+
 
 
 
@@ -23,10 +23,10 @@ class Prefecture
 	 * @var array
 	 */
 	public static $prefs = array(
-		'北海道' => array(
+		'北海道'   => array(
 			'北海道',
 		),
-		'東北' => array(
+		'東北'    => array(
 			'青森県',
 			'岩手県',
 			'宮城県',
@@ -34,7 +34,7 @@ class Prefecture
 			'山形県',
 			'福島県',
 		),
-		'関東' => array(
+		'関東'    => array(
 			'茨城県',
 			'栃木県',
 			'群馬県',
@@ -43,23 +43,23 @@ class Prefecture
 			'東京都',
 			'神奈川県',
 		),
-		'甲信越' => array(
+		'甲信越'   => array(
 			'新潟県',
 			'山梨県',
 			'長野県',
 		),
-		'北陸' => array(
+		'北陸'    => array(
 			'富山県',
 			'石川県',
 			'福井県',
 		),
-		'東海' => array(
+		'東海'    => array(
 			'岐阜県',
 			'静岡県',
 			'愛知県',
 			'三重県',
 		),
-		'近畿' => array(
+		'近畿'    => array(
 			'滋賀県',
 			'京都府',
 			'大阪府',
@@ -67,14 +67,14 @@ class Prefecture
 			'奈良県',
 			'和歌山県',
 		),
-		'中国' => array(
+		'中国'    => array(
 			'鳥取県',
 			'島根県',
 			'岡山県',
 			'広島県',
 			'山口県',
 		),
-		'四国' => array(
+		'四国'    => array(
 			'徳島県',
 			'香川県',
 			'愛媛県',
@@ -99,40 +99,41 @@ class Prefecture
 	 * @param bool $optgoup
 	 * @param bool $use_cache
 	 */
-	public static function options($selected = '', $optgoup = true, $use_cache = true){
+	public static function options( $selected = '', $optgoup = true, $use_cache = true ) {
 		/** @var \wpdb $wpdb */
 		global $wpdb;
 		$pref_ids = array();
-		$in = array();
-		foreach( self::$prefs as $region => $prefs ){
-			foreach( $prefs as $pref ){
-				$in[] = $pref;
-				$pref_ids[$pref] = 0;
+		$in       = array();
+		foreach ( self::$prefs as $region => $prefs ) {
+			foreach ( $prefs as $pref ) {
+				$in[]              = $pref;
+				$pref_ids[ $pref ] = 0;
 			}
 		}
-		$in = implode(', ', array_map(function($pref) use ($wpdb){
-			return $wpdb->prepare('%s', $pref);
+		$in       = implode(', ', array_map(function( $pref ) use ( $wpdb ) {
+			return $wpdb->prepare( '%s', $pref );
 		}, $in));
 		$taxonomy = BootStrap::get_instance()->taxonomy;
-		$query = <<<SQL
+		$query    = <<<SQL
 			SELECT t.term_id, t.name FROM {$wpdb->terms} AS t
 			INNER JOIN {$wpdb->term_taxonomy} AS tt
 			ON t.term_id = tt.term_id
 			WHERE tt.taxonomy = %s
 			  AND t.name IN ({$in})
 SQL;
-		foreach( $wpdb->get_results($wpdb->prepare($query, $taxonomy)) as $row ){
-			$pref_ids[$row->name] = intval($row->term_id);
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		foreach ( $wpdb->get_results( $wpdb->prepare( $query, $taxonomy ) ) as $row ) {
+			$pref_ids[ $row->name ] = intval( $row->term_id );
 		}
 
-		foreach( self::$prefs as $region => $prefs ){
-			$options = array_map( function($p) use ($selected, $pref_ids){
-				return sprintf('<option value="%d"%s>%s</option>', esc_attr($pref_ids[$p]), selected($pref_ids[$p] == $selected, true, false), esc_html($p));
+		foreach ( self::$prefs as $region => $prefs ) {
+			$options = array_map( function( $p ) use ( $selected, $pref_ids ) {
+				return sprintf( '<option value="%d"%s>%s</option>', esc_attr( $pref_ids[ $p ] ), selected( $pref_ids[ $p ], $selected, false ), esc_html( $p ) );
 			}, $prefs);
-			if( $optgoup ){
-				printf('<optgroup label="%s">%s</optgroup>', esc_attr($region), implode("\n", $options));
-			}else{
-				echo implode("\n", $options);
+			if ( $optgoup ) {
+				printf( '<optgroup label="%s">%s</optgroup>', esc_attr( $region ), implode( "\n", $options ) );
+			} else {
+				echo implode( "\n", $options );
 			}
 		}
 	}
@@ -143,11 +144,11 @@ SQL;
 	 * @param bool $tofuken
 	 * @return array
 	 */
-	public static function get_pref($tofuken = true){
+	public static function get_pref( $tofuken = true ) {
 		$prefs = array();
-		foreach( self::$prefs as $region => $prefs ){
-			$prefs = array_merge($prefs, array_map(function($pref) use ($tofuken){
-				return !$tofuken ? Prefecture::remove_tofuken($pref) : $pref;
+		foreach ( self::$prefs as $region => $prefs ) {
+			$prefs = array_merge($prefs, array_map(function( $pref ) use ( $tofuken ) {
+				return ! $tofuken ? Prefecture::remove_tofuken( $pref ) : $pref;
 			}, $prefs));
 		}
 		return $prefs;
@@ -160,8 +161,8 @@ SQL;
 	 *
 	 * @return mixed
 	 */
-	public static function remove_tofuken($pref){
-		return preg_replace('/(都|府|県)$/u', '', $pref);
+	public static function remove_tofuken( $pref ) {
+		return preg_replace( '/(都|府|県)$/u', '', $pref );
 	}
 
 	/**
@@ -169,20 +170,19 @@ SQL;
 	 *
 	 * @return array
 	 */
-	public static function get_pref_terms(){
-		$model = Zip::get_instance();
-		$areas = get_terms($model->taxonomy, array('hide_empty' => false, 'parent' => 0));
+	public static function get_pref_terms() {
+		$model  = Zip::get_instance();
+		$areas  = get_terms( $model->taxonomy, array('hide_empty' => false, 'parent' => 0) );
 		$return = array();
-		foreach( static::$prefs as $region => $prefs ){
-			$return[$region] = array();
-			foreach( $prefs as $pref ){
-				foreach( $areas as $area ){
-					if( $area->name === $pref ){
-						$return[$region][] = $area;
+		foreach ( static::$prefs as $region => $prefs ) {
+			$return[ $region ] = array();
+			foreach ( $prefs as $pref ) {
+				foreach ( $areas as $area ) {
+					if ( $area->name === $pref ) {
+						$return[ $region ][] = $area;
 						break;
 					}
 				}
-
 			}
 		}
 		return $return;

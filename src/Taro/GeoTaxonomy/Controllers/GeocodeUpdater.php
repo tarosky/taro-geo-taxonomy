@@ -63,8 +63,8 @@ class GeocodeUpdater extends Application {
 	 * @return int|\WP_Error
 	 */
 	public function update_google_geocode( $limit ) {
-		$offset = $this->google_cache_limit();
-		$points = Point::get_instance()->get_points_to_be_refreshed( [
+		$offset  = $this->google_cache_limit();
+		$points  = Point::get_instance()->get_points_to_be_refreshed( [
 			'limit'  => $limit,
 			'offset' => $offset,
 		] );

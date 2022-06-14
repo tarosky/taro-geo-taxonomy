@@ -11,8 +11,8 @@ use Taro\GeoTaxonomy\Pattern\Model;
  *
  * @package Taro\GeoTaxonomy\Model
  */
-class Zip extends Model
-{
+class Zip extends Model {
+
 
 	protected $name = 'areas';
 
@@ -59,17 +59,18 @@ SQL;
 	 *
 	 * @return bool
 	 */
-	public function add($zip, $prefecture, $city, $town, $prefecture_yomi = '', $city_yomi = '', $town_yomi = ''){
-		$zip = $this->normalize_zip($zip);
-		$data = compact('zip', 'prefecture', 'city', 'town', 'prefecture_yomi' , 'city_yomi', 'town_yomi');
-		if( $address = $this->get_by_zip($zip) ){
+	public function add( $zip, $prefecture, $city, $town, $prefecture_yomi = '', $city_yomi = '', $town_yomi = '' ) {
+		$zip     = $this->normalize_zip( $zip );
+		$data    = compact( 'zip', 'prefecture', 'city', 'town', 'prefecture_yomi', 'city_yomi', 'town_yomi' );
+		$address = $this->get_by_zip( $zip );
+		if ( $address ) {
 			// Record exists, so update
 			return (bool) $this->update($data, array(
-				'area_id' => $address->area_id
+				'area_id' => $address->area_id,
 			));
-		}else{
+		} else {
 			// Doesn't exist, insert
-			return (bool) $this->insert($data);
+			return (bool) $this->insert( $data );
 		}
 
 	}
@@ -81,12 +82,12 @@ SQL;
 	 *
 	 * @return null|\stdClass
 	 */
-	public function get_by_zip($zip){
-		$zip = $this->normalize_zip($zip);
-		if( 7 === strlen($zip) ){
-			return $this->get_row("SELECT * FROM {$this->table} WHERE zip = %s", $zip);
-		}else{
-			return $this->get_row("SELECT * FROM {$this->table} WHERE zip LIKE %s", '%'.$zip);
+	public function get_by_zip( $zip ) {
+		$zip = $this->normalize_zip( $zip );
+		if ( 7 === strlen( $zip ) ) {
+			return $this->get_row( "SELECT * FROM {$this->table} WHERE zip = %s", $zip );
+		} else {
+			return $this->get_row( "SELECT * FROM {$this->table} WHERE zip LIKE %s", '%' . $zip );
 		}
 	}
 
@@ -95,8 +96,8 @@ SQL;
 	 *
 	 * @return int
 	 */
-	public function city_total(){
-		return (int) $this->get_var("SELECT COUNT(distinct prefecture, city) FROM {$this->table}");
+	public function city_total() {
+		return (int) $this->get_var( "SELECT COUNT(distinct prefecture, city) FROM {$this->table}" );
 	}
 
 	/**
@@ -104,8 +105,8 @@ SQL;
 	 *
 	 * @return int
 	 */
-	public function total(){
-		return (int) $this->get_var("SELECT COUNT(area_id) FROM {$this->table}");
+	public function total() {
+		return (int) $this->get_var( "SELECT COUNT(area_id) FROM {$this->table}" );
 	}
 
 	/**
@@ -116,14 +117,14 @@ SQL;
 	 *
 	 * @return array
 	 */
-	public function get_cities($offset = 0, $limit = 100){
+	public function get_cities( $offset = 0, $limit = 100 ) {
 		$query = <<<SQL
 			SELECT DISTINCT
 				prefecture, city, prefecture_yomi, city_yomi
 				FROM {$this->table}
 			LIMIT %d, %d
 SQL;
-		return $this->get_results($query, $offset, $limit);
+		return $this->get_results( $query, $offset, $limit );
 	}
 
 	/**
@@ -134,18 +135,18 @@ SQL;
 	 *
 	 * @return array
 	 */
-	public function search_city($s, $parent_id = 0){
+	public function search_city( $s, $parent_id = 0 ) {
 		$wheres = array(
-			$this->db->prepare("( t.name LIKE %s OR tt.description LIKE %s )", "%{$s}%", "%{$s}%")
+			$this->db->prepare( '( t.name LIKE %s OR tt.description LIKE %s )', "%{$s}%", "%{$s}%" ),
 		);
-		if( $parent_id ){
-			array_unshift($wheres, $this->db->prepare("( tt.parent = %d )", $parent_id));
-		}else{
-			array_unshift($wheres, "( tt.parent IS NOT 0 )");
+		if ( $parent_id ) {
+			array_unshift( $wheres, $this->db->prepare( '( tt.parent = %d )', $parent_id ) );
+		} else {
+			array_unshift( $wheres, '( tt.parent IS NOT 0 )' );
 		}
-		array_unshift($wheres, $this->db->prepare("( tt.taxonomy = %s )", $this->taxonomy));
-		$where_clause = implode(' AND ', $wheres);
-		$query = <<<SQL
+		array_unshift( $wheres, $this->db->prepare( '( tt.taxonomy = %s )', $this->taxonomy ) );
+		$where_clause = implode( ' AND ', $wheres );
+		$query        = <<<SQL
 			SELECT t.term_id, t.name, tt.description
 			FROM {$this->db->terms} AS t
 			INNER JOIN {$this->db->term_taxonomy} AS tt
@@ -153,7 +154,7 @@ SQL;
 			WHERE {$where_clause}
 			ORDER BY t.term_id ASC
 SQL;
-		$result = $this->get_results($query);
+		$result       = $this->get_results( $query );
 		return $result;
 	}
 
@@ -165,15 +166,15 @@ SQL;
 	 *
 	 * @return null|array|\stdClass
 	 */
-	public function search_from_zip($zip, $multiple = false){
+	public function search_from_zip( $zip, $multiple = false ) {
 		$query = <<<SQL
 			SELECT * FROM {$this->table}
 			WHERE zip LIKE %s
 SQL;
-		if( $multiple ){
-			return $this->get_results($query, "{$zip}%");
-		}else{
-			return $this->get_row($query, "{$zip}%");
+		if ( $multiple ) {
+			return $this->get_results( $query, "{$zip}%" );
+		} else {
+			return $this->get_row( $query, "{$zip}%" );
 		}
 	}
 
@@ -184,8 +185,8 @@ SQL;
 	 *
 	 * @return string
 	 */
-	public function normalize_zip($zip){
-		return preg_replace('/[^0-9]/', '', $zip);
+	public function normalize_zip( $zip ) {
+		return preg_replace( '/[^0-9]/', '', $zip );
 	}
 
 
@@ -196,9 +197,9 @@ SQL;
 	 *
 	 * @return mixed
 	 */
-	public function format_zip($zip){
-		$zip = $this->normalize_zip($zip);
-		return preg_replace('/[0-9]{3}[0-9]{4}/', '$1-$2', $zip);
+	public function format_zip( $zip ) {
+		$zip = $this->normalize_zip( $zip );
+		return preg_replace( '/[0-9]{3}[0-9]{4}/', '$1-$2', $zip );
 	}
 
 

@@ -11,8 +11,8 @@ use function wp_verify_nonce;
  *
  * @package Taro\GeoTaxonomy\Utility
  */
-class Input extends Singleton
-{
+class Input extends Singleton {
+
 
 	/**
 	 * Get $_GET
@@ -21,8 +21,8 @@ class Input extends Singleton
 	 *
 	 * @return string|null
 	 */
-	public function get($key) {
-		return isset($_GET[ $key ]) ? $_GET[ $key ] : null;
+	public function get( $key ) {
+		return isset( $_GET[ $key ] ) ? $_GET[ $key ] : null;
 	}
 
 	/**
@@ -32,8 +32,8 @@ class Input extends Singleton
 	 *
 	 * @return string|null
 	 */
-	public function post($key) {
-		return isset($_POST[ $key ]) ? $_POST[ $key ] : null;
+	public function post( $key ) {
+		return isset( $_POST[ $key ] ) ? $_POST[ $key ] : null;
 	}
 
 	/**
@@ -43,8 +43,8 @@ class Input extends Singleton
 	 *
 	 * @return string|null
 	 */
-	public function request($key) {
-		return isset($_REQUEST[ $key ]) ? $_REQUEST[ $key ] : null;
+	public function request( $key ) {
+		return isset( $_REQUEST[ $key ] ) ? $_REQUEST[ $key ] : null;
 	}
 
 	/**
@@ -55,8 +55,8 @@ class Input extends Singleton
 	 *
 	 * @return bool
 	 */
-	public function verify_nonce($action, $key = '_wpnonce') {
-		return $this->request($key) && wp_verify_nonce( $this->request( $key ), $action );
+	public function verify_nonce( $action, $key = '_wpnonce' ) {
+		return $this->request( $key ) && wp_verify_nonce( $this->request( $key ), $action );
 	}
 
 }

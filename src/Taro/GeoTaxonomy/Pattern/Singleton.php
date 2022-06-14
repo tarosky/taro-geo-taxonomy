@@ -8,8 +8,8 @@ namespace Taro\GeoTaxonomy\Pattern;
  *
  * @package Taro\GeoTaxonomy\Pattern
  */
-abstract class Singleton
-{
+abstract class Singleton {
+
 	/**
 	 * Instance holder
 	 *

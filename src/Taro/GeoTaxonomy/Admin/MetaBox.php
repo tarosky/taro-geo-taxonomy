@@ -51,7 +51,7 @@ class MetaBox extends Application {
 		foreach ( $this->model->search_city( $q, $parent ) as $row ) {
 			$terms[] = array(
 				'id'   => (int) $row->term_id,
-				'name' => sprintf( "%s（%s）", $row->name, $row->description )
+				'name' => sprintf( '%s（%s）', $row->name, $row->description ),
 			);
 		}
 		wp_send_json( $terms );
@@ -62,7 +62,11 @@ class MetaBox extends Application {
 	 */
 	public function admin_zip_search() {
 		$zip = preg_replace( '/[^0-9]/', '', ( $this->input->get( 'zip' ) ?: '' ) );
-		if ( ! preg_match( '/^[0-9]{3,7}$/', $zip ) || ! ( $address = $this->model->search_from_zip( $zip ) ) ) {
+		if ( ! preg_match( '/^[0-9]{3,7}$/', $zip ) ) {
+			wp_send_json( array() );
+		}
+		$address = $this->model->search_from_zip( $zip );
+		if ( ! $address ) {
 			wp_send_json( array() );
 		}
 		$json = array(
@@ -70,13 +74,13 @@ class MetaBox extends Application {
 		);
 		$city = get_term_by( 'name', $address->city, $this->model->taxonomy );
 		if ( $city ) {
-			$json[ 'city' ] = array(
+			$json['city'] = array(
 				'id'   => (int) $city->term_id,
-				'name' => sprintf( "%s（%s）", $city->name, $city->description ),
+				'name' => sprintf( '%s（%s）', $city->name, $city->description ),
 			);
 		}
 		if ( false === strpos( $address->town, '以下に掲載' ) ) {
-			$json[ 'street' ] = $address->town;
+			$json['street'] = $address->town;
 		}
 		wp_send_json( $json );
 	}
@@ -135,7 +139,7 @@ class MetaBox extends Application {
 				'context'  => 'normal',
 				'priority' => 'high',
 			) );
-			add_meta_box( 'taro-geo-taxonomy-box', __( '地域', 'taro-geo-tax' ), [ $this, 'do_meta_box' ], $post_type, $context[ 'context' ], $context[ 'priority' ] );
+			add_meta_box( 'taro-geo-taxonomy-box', __( '地域', 'taro-geo-tax' ), [ $this, 'do_meta_box' ], $post_type, $context['context'], $context['priority'] );
 			// Remove original Taxonomy
 			remove_meta_box( $this->taxonomy . 'div', $post_type, 'side' );
 			// Add CSS and JS
@@ -151,12 +155,12 @@ class MetaBox extends Application {
 		wp_enqueue_script( 'taro-geo-mb', $this->assets . '/js/edit-screen.js', array(
 			'jquery-effects-highlight',
 			'jquery-token-input',
-			'google-map'
+			'google-map',
 		), $this->version, true );
 		wp_localize_script( 'taro-geo-mb', 'TaroGeo', array(
 			'token' => admin_url( 'admin-ajax.php?action=geo_token_input' ),
 			'zip'   => admin_url( 'admin-ajax.php?action=admin_zip_search' ),
-			'key'   => $this->option[ 'api_key' ],
+			'key'   => $this->option['api_key'],
 		) );
 	}
 
@@ -168,7 +172,7 @@ class MetaBox extends Application {
 	public function do_meta_box( \WP_Post $post ) {
 		wp_nonce_field( 'taro_geo_save', '_taro_geo_nonce', false );
 		$this->load_template( 'meta-box', array(
-			'post' => $post
+			'post' => $post,
 		) );
 	}
 

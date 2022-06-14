@@ -47,7 +47,7 @@ class SeoMeta extends Application {
 		if ( ! $this->should_render_json_ld() ) {
 			return;
 		}
-		$json = $this->get_json( get_queried_object() );
+		$json             = $this->get_json( get_queried_object() );
 		$json['@context'] = 'https://schema.org';
 		printf( "<!-- Taro Geo Taxonomy -->\n<script type=\"application/ld+json\">\n%s\n</script>", json_encode( $json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 	}
@@ -65,21 +65,21 @@ class SeoMeta extends Application {
 			'url'   => get_permalink( $post ),
 		];
 		// Address.
-		$address = new Address( $post );
-		$detail = $address->get();
-		$json[ 'address' ] = apply_filters( 'taro_geo_taxonomy_json_ld_address', [
+		$address         = new Address( $post );
+		$detail          = $address->get();
+		$json['address'] = apply_filters( 'taro_geo_taxonomy_json_ld_address', [
 			'@type'           => 'PostalAddress',
 			'streetAddress'   => trim( $detail['street'] . ' ' . $detail['building'] ),
 			'addressLocality' => $detail['city'],
 			'addressRegion'   => $detail['prefecture'],
 			'postalCode'      => $detail['zip'],
-			'addressCountry'  => apply_filters( 'taro_geo_taxonomy_json_ld_country', 'JP', $post )
+			'addressCountry'  => apply_filters( 'taro_geo_taxonomy_json_ld_country', 'JP', $post ),
 		], $post );
 		// Geo location.
 		$lat = $address->lat;
 		$lng = $address->lng;
 		if ( $lat && $lng ) {
-			$json[ 'geo' ] = [
+			$json['geo'] = [
 				'@type'     => 'GeoCoordinates',
 				'latitude'  => $lat,
 				'longitude' => $lng,

@@ -9,7 +9,7 @@
  * License: GPL-3.0-or-later
  */
 
-require __DIR__.'/vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
 if ( class_exists( 'Taro\\GeoTaxonomy\\BootStrap' ) ) {
 	Taro\GeoTaxonomy\BootStrap::get_instance();

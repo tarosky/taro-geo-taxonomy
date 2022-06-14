@@ -17,10 +17,12 @@ class SeoMeta extends Application {
 	public function __construct( $arguments = array() ) {
 		// For Yoast SEO.
 		add_filter( 'wpseo_schema_graph', [ $this, 'add_yoast_json' ] );
+		// If yoast not exists, render json ld.
+		add_action( 'wp_head', [ $this, 'add_json_ld' ], 99 );
 	}
 
 	/**
-	 *
+	 * Add JSON ld to yoast.
 	 *
 	 * @return array
 	 */
@@ -29,6 +31,25 @@ class SeoMeta extends Application {
 			$pieces[] = $this->get_json( get_queried_object() );
 		}
 		return $pieces;
+	}
+
+	/**
+	 * Render JSON-LD
+	 *
+	 * @return void
+	 */
+	public function add_json_ld() {
+		// Yoast exists?
+		if ( defined( 'WPSEO_FILE' ) ) {
+			return;
+		}
+		// Should render?
+		if ( ! $this->should_render_json_ld() ) {
+			return;
+		}
+		$json = $this->get_json( get_queried_object() );
+		$json['@context'] = 'https://schema.org';
+		printf( "<!-- Taro Geo Taxonomy -->\n<script type=\"application/ld+json\">\n%s\n</script>", json_encode( $json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 	}
 
 	/**

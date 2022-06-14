@@ -12,17 +12,17 @@
 
         // Sync prefecture ID
         $('#prefecture', '#taro-geo-taxonomy-box').change(function(){
-            var $city = $('#city', '#taro-geo-taxonomy-box'),
+            const $city = $('#city', '#taro-geo-taxonomy-box'),
                 prev = $city.attr('data-prefecture'),
                 next = $(this).val();
             $city.attr('data-prefecture', next);
-            if( prev != next ){
+            if( prev !== next ){
                 $city.trigger('clear.geo.taro');
             }
         });
 
         // Token input
-        var $city = $('#city', '#taro-geo-taxonomy-box');
+        const $city = $('#city', '#taro-geo-taxonomy-box');
 
         $city.tokenInput(function(){
             return TaroGeo.token + "&term_id=" + $('#city').attr('data-prefecture');
@@ -37,7 +37,7 @@
         });
 
         // Fil token if possible
-        var id = $city.attr('data-id'),
+        const id = $city.attr('data-id'),
             name = $city.attr('data-name');
         if( id && name ){
             $city.tokenInput('add', {
@@ -53,7 +53,7 @@
                 zip: $('#zip').val()
             } ).done( function(address){
                 if( address.prefecture ){
-                    var hit = false;
+                    let hit = false;
                     $('option', '#prefecture').each(function(index, opt){
                         if( $(opt).text() === address.prefecture ){
                             $(opt).attr('selected', true);
@@ -75,11 +75,12 @@
 
         // Google Map
         (function(){
-            var center = {
+            const center = {
                     lat: 35.686573,
                     lng: 139.742216
-                }, map, marker,
-                $mapContainer = $('#taro-gmap-container');
+                };
+			let map, marker;
+			const $mapContainer = $('#taro-gmap-container');
 
             function setMap(latLng){
                 center.lat = latLng.lat();
@@ -96,7 +97,7 @@
             if( $mapContainer.length ){
 
                 // Cet center if exists
-                var lat = $('#lat').val(),
+                const lat = $('#lat').val(),
                     lng = $('#lng').val(),
                     reg = /^[0-9\.]+$/;
                 if( reg.test(lat) && reg.test(lng) ){
@@ -140,18 +141,18 @@
                 });
 
                 // Search Address
-                var geocoder = new google.maps.Geocoder();
+                const geocoder = new google.maps.Geocoder();
                 $('#taro-geo-searcher').click(function(e){
                     e.preventDefault();
-                    var pref = $('#prefecture option:selected').text(),
+                    const pref = $('#prefecture option:selected').text(),
                         city = $('#city').tokenInput('get'),
                         street = $('#street').val();
                     if( pref.length && city.length && street.length ){
-                        var address = [pref, city[0].name.replace(/（.*）/, ''), street].join(' ');
+                        const address = [pref, city[0].name.replace(/（.*）/, ''), street].join(' ');
                         geocoder.geocode( {
                             address: address
                         }, function(results, status) {
-                            if ( status == google.maps.GeocoderStatus.OK ) {
+                            if ( status === google.maps.GeocoderStatus.OK ) {
                                 marker.setPosition(results[0].geometry.location);
                                 setMap(results[0].geometry.location);
                                 updatePosition(results[0].geometry.location);

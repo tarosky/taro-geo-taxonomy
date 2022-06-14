@@ -1,8 +1,6 @@
 /**
- * Description
+ * Setting screen helper.
  */
-
-/* global TaroGeoVars:true */
 
 (function ($) {
     'use strict';
@@ -11,7 +9,7 @@
     $(document).ready(function(){
         $('.geo-importer form').submit(function(e){
             e.preventDefault();
-            var $form = $(this),
+            const $form = $(this),
                 $pre = $form.find('pre');
             if( !$form.hasClass('loading') ){
                 $form.addClass('loading');

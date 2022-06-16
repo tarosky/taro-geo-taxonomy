@@ -137,16 +137,16 @@ SQL;
 	 *
 	 * @return bool
 	 */
-	public function add_point( $key, $object_id, $lat, $lng, $name = '', $desc = '' ) {
+	public function add_point( $key, $object_id, $lat, $lng, $name = '', $desc = '', $src = 'google' ) {
 		$query = <<<SQL
 			INSERT INTO {$this->table} (
-				point_key, object_id, latlng, point_name, point_desc, updated
+				point_key, object_id, latlng, point_name, point_desc, src, updated
 			) VALUES (
-				%s, %d, ST_GeomFromText(%s), %s, %s, %s
+				%s, %d, ST_GeomFromText(%s), %s, %s, %s, %s
 			)
 SQL;
 
-		return (bool) $this->query( $query, $key, $object_id, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ) );
+		return (bool) $this->query( $query, $key, $object_id, "POINT({$lng} {$lat})", $name, $desc, $src, current_time( 'mysql', true ) );
 	}
 
 	/**
@@ -158,20 +158,22 @@ SQL;
 	 * @param float $lng
 	 * @param string $name
 	 * @param string $desc
+	 * @param string $src
 	 *
 	 * @return int
 	 */
-	public function update_points( $key, $object_id, $lat, $lng, $name = '', $desc = '' ) {
+	public function update_points( $key, $object_id, $lat, $lng, $name = '', $desc = '', $src = 'google' ) {
 		$query = <<<SQL
 			UPDATE {$this->table}
 			SET latlng = ST_GeomFromText(%s),
 				point_name = %s,
 				point_desc = %s,
+				src        = %s,
 				updated    = %s
 			WHERE point_key = %s AND object_id = %d
 SQL;
 
-		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ), $key, $object_id );
+		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, $src, current_time( 'mysql', true ), $key, $object_id );
 	}
 
 	/**
@@ -185,17 +187,18 @@ SQL;
 	 *
 	 * @return int
 	 */
-	public function update_point( $point_id, $lat, $lng, $name = '', $desc = '' ) {
+	public function update_point( $point_id, $lat, $lng, $name = '', $desc = '', $src = 'google' ) {
 		$query = <<<SQL
 			UPDATE {$this->table}
 			SET latlng = ST_GeomFromText(%s),
 			    point_name = %s,
 			    point_desc = %s,
+			    src        = %s,
 			    updated    = %s,
 			WHERE point_id = %d
 SQL;
 
-		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, current_time( 'mysql', true ), $point_id );
+		return $this->query( $query, "POINT({$lng} {$lat})", $name, $desc, $src, current_time( 'mysql', true ), $point_id );
 	}
 
 	/**
@@ -290,7 +293,8 @@ SQL;
 			SELECT
 				point_id,
 				point_key, point_name, point_desc,
-				ST_X(latlng) AS lng, ST_Y(latlng) AS lat
+				ST_X(latlng) AS lng, ST_Y(latlng) AS lat,
+				updated, src
 			FROM {$this->table}
 			WHERE point_key = %s
 			  AND object_id = %d

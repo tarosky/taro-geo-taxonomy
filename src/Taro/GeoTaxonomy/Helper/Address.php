@@ -18,6 +18,8 @@ use Taro\GeoTaxonomy\Models\Point;
  * @property-read string $building
  * @property-read float|false $lat
  * @property-read float|false $lng
+ * @property-read string $src
+ * @property-read string $updated
  */
 class Address {
 	/**
@@ -220,6 +222,9 @@ class Address {
 					'slug'             => '',
 				);
 				break;
+			case 'latlng':
+				return Point::get_instance()->get_point( 'post_address', $this->post->ID );
+				break;
 			case 'lat':
 			case 'lng':
 				$point = $this->latlng;
@@ -229,9 +234,11 @@ class Address {
 					return false;
 				}
 				break;
-			case 'latlng':
-				return Point::get_instance()->get_point( 'post_address', $this->post->ID );
 				break;
+			case 'src':
+			case 'updated':
+				$point = $this->latlng;
+				return $point->{$name} ?? '';
 			default:
 				return null;
 				break;

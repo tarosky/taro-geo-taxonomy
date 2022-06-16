@@ -37,14 +37,19 @@ abstract class Application extends Singleton {
 		return array(
 			'taxonomy'   => 'area',
 			'label'      => __( '地域', 'taro-geo-tax' ),
-			'source'     => array(
+			'source'     => [
 				'label'       => '日本',
 				'url'         => 'http://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip',
 				// translators: %s is url.
 				'description' => sprintf( __( '郵便局が公開している<a href="%s">郵便番号データ</a>を元にしています。', 'taro-geo-tax' ), 'http://www.post.japanpost.jp/zipcode/dl/kogaki-zip.html' ),
-			),
-			'post_types' => array(),
-			'api_key'    => '',
+			],
+			'post_types'        => [],
+			'api_key'           => '',
+			'geolonia_key'      => '',
+			'aws_access_key'    => '',
+			'aws_access_secret' => '',
+			'aws_index_name'    => '',
+			'country'           => 'JPN',
 		);
 	}
 

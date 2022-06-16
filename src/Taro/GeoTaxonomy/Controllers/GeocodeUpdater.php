@@ -2,6 +2,10 @@
 
 namespace Taro\GeoTaxonomy\Controllers;
 
+use Aws\CognitoIdentity\CognitoIdentityClient;
+use Aws\CognitoIdentity\CognitoIdentityProvider;
+use Aws\Credentials\Credentials;
+use Aws\LocationService\LocationServiceClient;
 use Taro\GeoTaxonomy\Models\Point;
 use Taro\GeoTaxonomy\Pattern\Application;
 
@@ -74,5 +78,45 @@ class GeocodeUpdater extends Application {
 			// Do update.
 		}
 		return empty( $error->get_error_messages() ) ? $updated : $error;
+	}
+
+	/**
+	 * Convert address.
+	 *
+	 * @param string $address Address text.
+	 * @return float[]|\WP_Error
+	 */
+	public function geocode( $address ) {
+		try {
+			$client = $this->get_location_client();
+			$result = $client->searchPlaceIndexForText( [
+				'Text'            => $address,
+				'IndexName'       => $this->option['aws_index_name'],
+				'FilterCountries' => [ $this->option['country'] ],
+			] );
+			if ( empty( $result['Results'] ) ) {
+				return [];
+			}
+			foreach ( $result['Results'] as $latlng ) {
+				return $latlng['Place']['Geometry']['Point'];
+			}
+		} catch ( \Exception $e ) {
+			return new \WP_Error( 'geocode_error', '[' . $e->getCode() . ']' . $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Get location service client.
+	 *
+	 * @return LocationServiceClient
+	 */
+	protected function get_location_client() {
+		$credential  = new Credentials( $this->option['aws_access_key'], $this->option['aws_access_secret'] );
+		$credentials = apply_filters( 'taro_geo_taxonomy_aws_credentials', [
+			'version'     => 'latest',
+			'region'      => 'ap-northeast-1',
+			'credentials' => $credential,
+		], 'local_service_client' );
+		return new LocationServiceClient( $credentials );
 	}
 }

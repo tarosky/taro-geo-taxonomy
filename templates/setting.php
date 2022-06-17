@@ -61,7 +61,10 @@ defined( 'ABSPATH' ) or die();
 				<td>
 					<input type="text" name="geolonia-key" id="geolonia-key" value="<?php echo esc_attr( $this->option['geolonia_key'] ); ?>" class="regular-text" />
 					<p class="description">
-						<?php printf( __( '<a href="%s" target="_blank">Geolonia</a>でAPIキーを取得できます。', 'taro-geo-tax' ), 'https://geolonia.com' ); ?>
+						<?php
+						// translators: %s is a URL.
+						printf( __( '<a href="%s" target="_blank">Geolonia</a>でAPIキーを取得できます。', 'taro-geo-tax' ), 'https://geolonia.com' );
+						?>
 					</p>
 				</td>
 			</tr>
@@ -73,7 +76,7 @@ defined( 'ABSPATH' ) or die();
 							<?php esc_html_e( 'AWSアクセスキー', 'taro-geo-tax' ); ?>
 							<br />
 							<input type="text" name="aws-access-key" class="regular-text"
-								value="<?php echo esc_attr( $this->option[ 'aws_access_key' ] ); ?>" />
+								value="<?php echo esc_attr( $this->option['aws_access_key'] ); ?>" />
 						</label>
 					</p>
 					<p>
@@ -81,7 +84,7 @@ defined( 'ABSPATH' ) or die();
 							<?php esc_html_e( 'AWSアクセスシークレット', 'taro-geo-tax' ); ?>
 							<br />
 							<input type="text" name="aws-access-secret" class="regular-text"
-								value="<?php echo esc_attr( $this->option[ 'aws_access_secret' ] ); ?>" />
+								value="<?php echo esc_attr( $this->option['aws_access_secret'] ); ?>" />
 						</label>
 					</p>
 					<p>
@@ -89,7 +92,7 @@ defined( 'ABSPATH' ) or die();
 							<?php esc_html_e( 'インデックス名', 'taro-geo-tax' ); ?>
 							<br />
 							<input type="text" name="aws-index-name" class="regular-text"
-								value="<?php echo esc_attr( $this->option[ 'aws_index_name' ] ); ?>" />
+								value="<?php echo esc_attr( $this->option['aws_index_name'] ); ?>" />
 						</label>
 					</p>
 					<p class="description">
@@ -101,7 +104,7 @@ defined( 'ABSPATH' ) or die();
 							<?php esc_html_e( '国', 'taro-geo-tax' ); ?>
 							<br />
 							<input type="text" name="country" class="regular-text"
-								value="<?php echo esc_attr( $this->option[ 'country' ] ); ?>" />
+								value="<?php echo esc_attr( $this->option['country'] ); ?>" />
 						</label>
 					</p>
 					<p class="description">

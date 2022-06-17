@@ -149,11 +149,11 @@ class Address {
 		if ( $args['allowfullscreen'] ) {
 			$attributes['allowfullscreen'] = true;
 		}
-		$query   = apply_filters( 'taro_geo_taxonomy_gmap_query', [
+		$query = apply_filters( 'taro_geo_taxonomy_gmap_query', [
 			'key' => $key,
 			'q'   => $this->gmap_query(),
 		], $this );
-		$q       = [];
+		$q     = [];
 		foreach ( $query as $param => $value ) {
 			$q[] = sprintf( '%s=%s', $param, rawurlencode( $value ) );
 		}
@@ -243,7 +243,7 @@ class Address {
 	public function get_map( $args = [] ) {
 		$args['lat'] = $this->lat;
 		$args['lng'] = $this->lng;
-		$content = sprintf( '<strong>%s</strong>', esc_html( get_the_title( $this->post ) ) );
+		$content     = sprintf( '<strong>%s</strong>', esc_html( get_the_title( $this->post ) ) );
 		return $this->embed_geolonia_map( $args, $content );
 	}
 

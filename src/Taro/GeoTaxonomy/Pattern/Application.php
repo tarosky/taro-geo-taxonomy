@@ -35,9 +35,9 @@ abstract class Application extends Singleton {
 	 */
 	private function get_default_option() {
 		return array(
-			'taxonomy'   => 'area',
-			'label'      => __( '地域', 'taro-geo-tax' ),
-			'source'     => [
+			'taxonomy'          => 'area',
+			'label'             => __( '地域', 'taro-geo-tax' ),
+			'source'            => [
 				'label'       => '日本',
 				'url'         => 'http://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip',
 				// translators: %s is url.

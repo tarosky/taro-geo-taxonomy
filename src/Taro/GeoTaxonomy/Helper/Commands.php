@@ -38,7 +38,7 @@ class Commands extends \WP_CLI_Command {
 	 */
 	public function get_geocode( $args, $option ) {
 		list( $address ) = $args;
-		$result = GeocodeUpdater::get_instance()->geocode( $address );
+		$result          = GeocodeUpdater::get_instance()->geocode( $address );
 		if ( is_wp_error( $result ) ) {
 			\WP_CLI::error( $result->get_error_message() );
 		}

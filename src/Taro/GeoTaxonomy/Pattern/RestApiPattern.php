@@ -49,7 +49,7 @@ abstract class RestApiPattern extends Application {
 	 * @return void
 	 */
 	public function register_rest() {
-		$methods = (array) $this->methods();
+		$methods  = (array) $this->methods();
 		$handlers = [];
 		foreach ( $methods as $method ) {
 			$handlers[] = [

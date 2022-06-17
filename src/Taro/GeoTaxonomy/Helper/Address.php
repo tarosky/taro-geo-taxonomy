@@ -149,10 +149,9 @@ class Address {
 		if ( $args['allowfullscreen'] ) {
 			$attributes['allowfullscreen'] = true;
 		}
-		$address = $this->get();
 		$query   = apply_filters( 'taro_geo_taxonomy_gmap_query', [
 			'key' => $key,
-			'q'   => implode( '+', [ $address['prefecture'], $address['city'], $address['street'] ] ),
+			'q'   => $this->gmap_query(),
 		], $this );
 		$q       = [];
 		foreach ( $query as $param => $value ) {
@@ -175,6 +174,89 @@ class Address {
 			}
 		}
 		return sprintf( '<iframe %s></iframe>', implode( ' ', $html_attr ) );
+	}
+
+	/**
+	 * Get Google map query.
+	 *
+	 * @param string $glue Default '+'.
+	 * @return string
+	 */
+	public function gmap_query( $glue = '+' ) {
+		$address = $this->get();
+		return implode( $glue, [ $address['prefecture'], $address['city'], $address['street'] ] );
+	}
+
+	/**
+	 * Get Google map url.
+	 *
+	 * @return string
+	 */
+	public function gmap_url( $glue = '+' ) {
+		return sprintf( 'https://www.google.com/maps/search/?api=1&query=%s', rawurlencode( $this->gmap_query() ) );
+	}
+
+	/**
+	 * Render geolonia map.
+	 *
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public function embed_geolonia_map( $args = [], $content = '' ) {
+		$args = wp_parse_args( $args, [
+			'class'      => 'geolonia',
+			'style'      => 'height:400px;',
+			'zoom'       => 17,
+			'open-popup' => 'on',
+			'lat'        => 35.686573,
+			'lng'        => 139.742216,
+		] );
+		if ( false === strpos( $args['class'], 'geolonia' ) ) {
+			$args['class'] .= ' geolonia';
+		}
+		$attributes = [];
+		foreach ( $args as $key => $value ) {
+			switch ( $key ) {
+				case 'class':
+				case 'style':
+					// Do nothign.
+					break;
+				default:
+					$key = 'data-' . $key;
+					break;
+			}
+			$attributes[] = sprintf( '%s="%s"', esc_html( $key ), esc_attr( $value ) );
+		}
+		return sprintf(
+			'<div %s>%s</div>',
+			implode( ' ', $attributes ),
+			wp_kses_post( $content )
+		);
+	}
+
+	/**
+	 * Get map of post.
+	 *
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public function get_map( $args = [] ) {
+		$args['lat'] = $this->lat;
+		$args['lng'] = $this->lng;
+		$content = sprintf( '<strong>%s</strong>', esc_html( get_the_title( $this->post ) ) );
+		return $this->embed_geolonia_map( $args, $content );
+	}
+
+	/**
+	 * Render map.
+	 *
+	 * @param $args
+	 *
+	 * @return void
+	 */
+	public function the_map( $args = [] ) {
+		wp_enqueue_script( 'geolonia-map' );
+		echo $this->get_map( $args );
 	}
 
 	/**

@@ -2,10 +2,9 @@
  * Edit screen
  *
  * @handle taro-geo-mb
- * @deps jquery-effects-highlight, jquery-token-input, google-map, geolonia-map, wp-api-fetch, wp-i18n
+ * @deps jquery-effects-highlight, jquery-token-input, geolonia-map, wp-api-fetch, wp-i18n
  */
 
-/* global google: true */
 /* global geolonia: false */
 /* global TaroGeo: true */
 

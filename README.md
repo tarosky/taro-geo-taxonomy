@@ -3,8 +3,8 @@
 Contributors: Takahashi_Fumiki,tarosky  
 Tags: Addrress, Japan, Map  
 Requires at least: 5.0  
-Requires PHP: 5.6  
-Tested up to: 5.9  
+Requires PHP: 7.2  
+Tested up to: 6.0  
 Stable tag: nightly
 
 WordPress plugin to create geometric taxonomy.

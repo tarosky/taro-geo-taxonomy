@@ -11,6 +11,7 @@ use Taro\GeoTaxonomy\Helper\Commands;
 use Taro\GeoTaxonomy\Models\Point;
 use Taro\GeoTaxonomy\Models\Zip;
 use Taro\GeoTaxonomy\Pattern\Application;
+use Taro\GeoTaxonomy\Rest\RestGeocoding;
 
 
 /**
@@ -38,6 +39,9 @@ class BootStrap extends Application {
 			// Create tables
 			Zip::register();
 		}
+		// REST API
+		RestGeocoding::get_instance();
+		// CLI Registration.
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command( 'taro-geo', Commands::class );
 		}
@@ -63,8 +67,29 @@ class BootStrap extends Application {
 		// Register google map
 		$key = $this->google_api_key;
 		wp_register_script( 'google-map', "//maps.googleapis.com/maps/api/js?key={$key}&sensor=true", array(), null, true );
+		wp_register_script( 'geolonia-map', "https://cdn.geolonia.com/v1/embed?geolonia-api-key={$this->option['geolonia_key']}", array(), null, true );
 		wp_register_script( 'jquery-token-input', $this->assets . '/vendor/jquery-tokeninput.min.js', array( 'jquery' ), '1.6.0', true );
-		wp_register_style( 'jquery-token-input', $this->assets . '/css/token-input.css', null, '1.6.1' );
+		// Register assets.
+		$json = $this->root_dir . '/wp-dependencies.json';
+		if ( file_exists( $json ) ) {
+			$assets = json_decode( file_get_contents( $json ), true );
+			if ( $assets ) {
+				foreach ( $assets as $asset ) {
+					if ( ! $asset ) {
+						continue;
+					}
+					$url = dirname( $this->assets ) . '/' . $asset['path'];
+					switch ( $asset['ext'] ) {
+						case 'js':
+							wp_register_script( $asset['handle'], $url, $asset['deps'], $asset['hash'], $asset['footer'] );
+							break;
+						case 'css':
+							wp_register_style( $asset['handle'], $url, $asset['deps'], $asset['hash'], $asset['media'] );
+							break;
+					}
+				}
+			}
+		}
 	}
 
 }

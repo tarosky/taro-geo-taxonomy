@@ -33,11 +33,11 @@ class Setting extends Application {
 	 * Enqueue script
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( 'taro-geo-admin', $this->assets . '/js/setting.js', array( 'jquery-effects-highlight' ), filemtime( $this->root_dir . '/dist/js/setting.js' ), true );
+		wp_enqueue_script( 'taro-geo-admin' );
 		wp_localize_script( 'taro-geo-admin', 'TaroGeoVars', array(
 			'loading' => $this->i18n->_( '読み込み中...' ),
 		) );
-		wp_enqueue_style( 'taro-geo-admin', $this->assets . '/css/admin.css', null, filemtime( $this->root_dir . '/dist/css/admin.css' ) );
+		wp_enqueue_style( 'taro-geo-admin' );
 	}
 
 	/**
@@ -71,10 +71,15 @@ class Setting extends Application {
 			// Save setting
 			$option = $this->option;
 			$option = array_merge( $option, array(
-				'post_types' => (array) $this->input->post( 'post_types' ),
-				'taxonomy'   => (string) $this->input->post( 'taxonomy-name' ),
-				'label'      => (string) $this->input->post( 'taxonomy-label' ),
-				'api_key'    => (string) $this->input->post( 'google-api-key' ),
+				'post_types'        => (array) $this->input->post( 'post_types' ),
+				'taxonomy'          => (string) $this->input->post( 'taxonomy-name' ),
+				'label'             => (string) $this->input->post( 'taxonomy-label' ),
+				'api_key'           => (string) $this->input->post( 'google-api-key' ),
+				'geolonia_key'      => (string) $this->input->post( 'geolonia-key' ),
+				'aws_access_key'    => (string) $this->input->post( 'aws-access-key' ),
+				'aws_access_secret' => (string) $this->input->post( 'aws-access-secret' ),
+				'aws_index_name'    => (string) $this->input->post( 'aws-index-name' ),
+				'country'           => (string) $this->input->post( 'country' ),
 			) );
 			update_option( 'taro-geo-setting', $option );
 			$message = $this->i18n->s( '設定が更新されました。' );

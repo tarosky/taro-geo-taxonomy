@@ -1,5 +1,8 @@
-/**
- * Setting screen helper.
+/*!
+ * Setting scrren helper
+ *
+ * @handle taro-geo-admin
+ * @deps jquery-effects-highlight
  */
 
 (function ($) {

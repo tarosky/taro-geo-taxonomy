@@ -110,11 +110,10 @@ class MetaBox extends Application {
 			update_post_meta( $post->ID, '_street', $this->input->post( 'street' ) );
 			update_post_meta( $post->ID, '_building', $this->input->post( 'building' ) );
 			if ( is_numeric( $this->input->post( 'lat' ) ) && is_numeric( $this->input->post( 'lng' ) ) ) {
-				var_dump( $this->points->point_count( 'post_address', $post_id ) );
 				if ( $this->points->point_count( 'post_address', $post_id ) ) {
-					$this->points->update_points( 'post_address', $post_id, $this->input->post( 'lat' ), $this->input->post( 'lng' ) );
+					$this->points->update_points( 'post_address', $post_id, $this->input->post( 'lat' ), $this->input->post( 'lng' ), '', '', $this->input->post( 'address-src' ) );
 				} else {
-					$this->points->add_point( 'post_address', $post_id, $this->input->post( 'lat' ), $this->input->post( 'lng' ) );
+					$this->points->add_point( 'post_address', $post_id, $this->input->post( 'lat' ), $this->input->post( 'lng' ), '', '', $this->input->post( 'address-src' ) );
 				}
 			} else {
 				$this->points->delete_point( 'post_address', $post_id );

@@ -5,7 +5,7 @@ Tags: Addrress, Japan, Map
 Requires at least: 5.0  
 Requires PHP: 7.2  
 Tested up to: 6.0  
-Stable tag: nightly
+Stable Tag: nightly
 
 WordPress plugin to create geometric taxonomy.
 

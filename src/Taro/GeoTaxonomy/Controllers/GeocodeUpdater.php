@@ -111,12 +111,17 @@ class GeocodeUpdater extends Application {
 	 * @return LocationServiceClient
 	 */
 	protected function get_location_client() {
-		$credential  = new Credentials( $this->option['aws_access_key'], $this->option['aws_access_secret'] );
-		$credentials = apply_filters( 'taro_geo_taxonomy_aws_credentials', [
-			'version'     => 'latest',
-			'region'      => 'ap-northeast-1',
-			'credentials' => $credential,
-		], 'local_service_client' );
-		return new LocationServiceClient( $credentials );
+		$region = apply_filters( 'taro_get_taxonomy_aws_region', 'ap-northeast-1' );
+		$setting = [
+			'version' => 'latest',
+			'region'  => $region,
+		];
+		// If no credentials provided,
+		// try to use default credentials.
+		if ( $this->option['aws_access_secret'] && $this->option['aws_access_key'] ) {
+			$setting['credentials'] = new Credentials( $this->option['aws_access_key'], $this->option['aws_access_secret'] );
+		}
+		$setting = apply_filters( 'taro_geo_taxonomy_aws_credentials', $setting, 'local_service_client' );
+		return new LocationServiceClient( $setting );
 	}
 }
